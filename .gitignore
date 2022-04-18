@@ -59,6 +59,10 @@ evaluation/results
 imgs_failed_tracking
 matchingSTATS.txt
 
+FrameTrajectory_KITTI_Format.txt
+FrameTrajectory_TUM_Format.txt
+KeyFrameTrajectory_TUM_Format.txt
+
 KeyFrameTrajectory.txt
 CameraTrajectory.txt
 kf_*.txt
