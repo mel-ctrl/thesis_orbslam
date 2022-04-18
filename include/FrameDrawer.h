@@ -49,13 +49,13 @@ public:
     // Draw last processed frame.
     cv::Mat DrawFrame(float imageScale=1.f);
     cv::Mat DrawRightFrame(float imageScale=1.f);
-
+    void SaveImg(cv::Mat &im, int nState);
     bool both;
 
 protected:
 
     void DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText);
-
+    int mSequence;
     // Info of the frame to be drawn
     cv::Mat mIm, mImRight;
     int N;

@@ -32,6 +32,7 @@ FrameDrawer::FrameDrawer(Atlas* pAtlas):both(false),mpAtlas(pAtlas)
     mState=Tracking::SYSTEM_NOT_READY;
     mIm = cv::Mat(480,640,CV_8UC3, cv::Scalar(0,0,0));
     mImRight = cv::Mat(480,640,CV_8UC3, cv::Scalar(0,0,0));
+    mSequence = 0;
 }
 
 cv::Mat FrameDrawer::DrawFrame(float imageScale)
@@ -197,6 +198,10 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale)
 
     cv::Mat imWithInfo;
     DrawTextInfo(im,state, imWithInfo);
+    if(state == 3 || state == 4){
+        SaveImg(imWithInfo, state);
+    }
+
 
     return imWithInfo;
 }
@@ -326,6 +331,14 @@ cv::Mat FrameDrawer::DrawRightFrame(float imageScale)
     return imWithInfo;
 }
 
+void FrameDrawer::SaveImg(cv::Mat &im, int nState){
+    
+
+    stringstream s;
+    s << "/home/meltem/ORB_SLAM3/imgs_failed_tracking/img_left_" << mSequence << "_" << nState << ".jpg";
+    std::string path = s.str();
+    cv::imwrite(path, im);
+}
 
 
 void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
@@ -344,7 +357,7 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
         int nMaps = mpAtlas->CountMaps();
         int nKFs = mpAtlas->KeyFramesInMap();
         int nMPs = mpAtlas->MapPointsInMap();
-        s << "Maps: " << nMaps << ", KFs: " << nKFs << ", MPs: " << nMPs << ", Matches: " << mnTracked;
+        s << "Maps: " << nMaps << ", KFs: " << nKFs << ", MPs: " << nMPs << ", Matches: " << mnTracked << ", Frame: " << mSequence;
         if(mnTrackedVO>0)
             s << ", + VO matches: " << mnTrackedVO;
     }
@@ -374,6 +387,7 @@ void FrameDrawer::Update(Tracking *pTracker)
     mvCurrentKeys=pTracker->mCurrentFrame.mvKeys;
     mThDepth = pTracker->mCurrentFrame.mThDepth;
     mvCurrentDepth = pTracker->mCurrentFrame.mvDepth;
+    mSequence = pTracker->mCurrentFrame.mSequence;
 
     if(both){
         mvCurrentKeysRight = pTracker->mCurrentFrame.mvKeysRight;

@@ -21,6 +21,7 @@
 #include "System.h"
 #include "Converter.h"
 #include <thread>
+#include <filesystem>
 #include <pangolin/pangolin.h>
 #include <iomanip>
 #include <openssl/md5.h>
@@ -50,6 +51,20 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     "This program comes with ABSOLUTELY NO WARRANTY;" << endl  <<
     "This is free software, and you are welcome to redistribute it" << endl <<
     "under certain conditions. See LICENSE.txt." << endl << endl;
+
+    std::vector<std::string> files_to_check = {"/home/meltem/thesis_orbslam/imgs_failed_tracking",
+                                     "/home/meltem/thesis_orbslam/matchingSTATS.txt"};
+
+
+    for (const auto &file : files_to_check) {
+        std::cout << file << "checking" << endl;
+        if(filesystem::exists(file)){
+            std::cout << file << "file exists" << endl;
+            filesystem::remove_all(file);
+        }
+    }
+
+
 
     cout << "Input sensor was set to: ";
 
@@ -103,6 +118,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     if(!node.empty())
     {
         activeLC = static_cast<int>(fsSettings["loopClosing"]) != 0;
+        cout << "Loop closing set to:" << activeLC << endl;
     }
 
     mStrVocabularyFilePath = strVocFile;
@@ -241,7 +257,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
 }
 
-Sophus::SE3f System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::Point>& vImuMeas, string filename)
+Sophus::SE3f System::TrackStereo(const int sequence, const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::Point>& vImuMeas, string filename)
 {
     if(mSensor!=STEREO && mSensor!=IMU_STEREO)
     {
@@ -313,7 +329,7 @@ Sophus::SE3f System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, 
             mpTracker->GrabImuData(vImuMeas[i_imu]);
 
     // std::cout << "start GrabImageStereo" << std::endl;
-    Sophus::SE3f Tcw = mpTracker->GrabImageStereo(imLeftToFeed,imRightToFeed,timestamp,filename);
+    Sophus::SE3f Tcw = mpTracker->GrabImageStereo(sequence, imLeftToFeed,imRightToFeed,timestamp,filename);
 
     // std::cout << "out grabber" << std::endl;
 
@@ -657,6 +673,7 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
     }
 
     f.close();
+    cout << endl << "Keyframe saved to " << filename << " ..." << endl;
 }
 
 void System::SaveTrajectoryEuRoC(const string &filename)
