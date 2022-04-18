@@ -55,6 +55,10 @@ Examples/Tests/sophus_test
 Examples/ROS/ORB_SLAM3/CMakeLists.txt.user
 Examples/ROS/ORB_SLAM3/build/
 
+evaluation/results
+imgs_failed_tracking
+matchingSTATS.txt
+
 KeyFrameTrajectory.txt
 CameraTrajectory.txt
 kf_*.txt

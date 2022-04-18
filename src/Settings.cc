@@ -237,6 +237,7 @@ namespace ORB_SLAM3 {
 
             calibration1_ = new Pinhole(vCalibration);
             originalCalib1_ = new Pinhole(vCalibration);
+	    originalCalib2_ = nullptr;
 
             //Rectified images are assumed to be ideal PinHole images (no distortion)
         }
@@ -559,9 +560,11 @@ namespace ORB_SLAM3 {
                 output << "Kannala-Brandt";
             }
             output << "" << ": [";
-            for(size_t i = 0; i < settings.originalCalib2_->size(); i++){
-                output << " " << settings.originalCalib2_->getParameter(i);
-            }
+	    if (settings.originalCalib2_) {
+            	for(size_t i = 0; i < settings.originalCalib2_->size(); i++){
+                	output << " " << settings.originalCalib2_->getParameter(i);
+            	}
+	    }
             output << " ]" << endl;
 
             if(!settings.vPinHoleDistorsion2_.empty()){

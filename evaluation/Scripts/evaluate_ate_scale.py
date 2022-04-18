@@ -41,10 +41,13 @@ This script computes the absolute trajectory error from the ground truth
 trajectory and the estimated trajectory.
 """
 
+from posixpath import split
 import sys
+from matplotlib.colors import Colormap
 import numpy
 import argparse
 import associate
+import yaml
 
 def align(model,data):
     """Align two trajectories using the method of Horn (closed-form).
@@ -128,7 +131,115 @@ def plot_traj(ax,stamps,traj,style,color,label):
         last= stamps[i]
     if len(x)>0:
         ax.plot(x,y,style,color=color,label=label)
-            
+
+
+def plot_odom(ax,style,color,label):
+    sequence_name = (args.first_file.split("/")[-1]).split("_")[0]
+    sequence_nr = ''.join(list(sequence_name)[-2:])
+    calib_file = "/media/meltem/T7/Meltem/Thesis/Datasets/Rosario/calibration" + sequence_nr + ".yaml"
+    odom_gt_path = args.first_file.split(sequence_name)[0] + "odometry_" + sequence_name + ".txt"
+
+    poses_all = []
+    pose_list = []
+    traj_x = []
+    traj_y = []
+    with open(odom_gt_path) as f:
+        for line in f:           
+            newline = line.split("\n")[0]
+            if newline[0] != '-':   
+                (key, value) = newline.split()
+                #key = key.split(':')[0]
+                #d[str(i)][str(key)]=float(value)
+                pose_list.append(float(value))
+            else:
+                poses_all.append(pose_list)
+                pose_list = []
+                continue
+
+    with open(calib_file) as f:
+        params = yaml.load(f, Loader=yaml.FullLoader)
+        imu_p_baselink = numpy.array(params['imu']['position_imu_baselink'])
+        cam_left_p_imu = numpy.array(params['cam0']['T_cam_imu'])[:-1,3]
+
+    for pose in poses_all:
+        x_cam_frame = pose[0]+ imu_p_baselink[0] + cam_left_p_imu[0]
+        y_cam_frame = pose[1]+ imu_p_baselink[1] + cam_left_p_imu[1]
+        traj_x.append(x_cam_frame)
+        traj_y.append(y_cam_frame)
+
+    ax.plot(traj_x,traj_y,style,color=color,label=label)
+
+def plot_feature_info(args.plot, args.iniFast, args.minFast):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from operator import truediv
+    import os
+    file = os.path.dirname(os.getcwd()) + "/results/matchingSTATS.txt"
+    resultPath = args.plot.split('.')[0]+".png"
+  
+
+    timestamp = []
+    mapnr = []
+    nrfeatures = []
+    nrmatches = []
+    nrinlier = []
+
+    with open(file) as f:
+        for line in f:           
+            ts, map, nrfeat, nrmatch, nrinl = line.split(",")
+            timestamp.append(float(ts))
+            mapnr.append(float(map))
+            nrfeatures.append(float(nrfeat))
+            nrmatches.append(float(nrmatch))
+            nrinlier.append(float(nrinl))
+
+    f.close()
+
+    frame_list = np.linspace(0, len(timestamp), len(timestamp), dtype=int)
+    perc_inl_match_list = [i / j * 100 for i, j in zip(nrinlier, nrmatches)]
+    perc_match_total_list = [i / j * 100 for i, j in zip(nrmatches, nrfeatures)]
+
+    fig, plot = plt.subplots(5, figsize = (40,20))
+    fig.suptitle("Feature matching statistics (iniThFAST = 20 and minThFAST = 4)")
+
+    plot1 = plot[0].scatter(frame_list, nrfeatures, c=mapnr)
+    plot[0].set_title('Number of features found in frame')
+    plot[0].axis(ymin=0, ymax=max(nrfeatures))
+
+    plot2 = plot[1].scatter(frame_list, nrmatches, c=mapnr)
+    plot[1].set_title('Number of features matched to local map')
+    
+
+    plot3 = plot[2].scatter(frame_list, nrinlier, c=mapnr)
+    plot[2].set_title('Number of inlier of the feature matches')
+    plot[2].axhline(y=30, color='r', linestyle='-')
+    
+    plot4 = plot[3].scatter(frame_list, perc_inl_match_list, c=mapnr)
+    plot[3].set_title('Percentage of inliers compared total number of matches')
+
+    plot5 = plot[4].scatter(frame_list, perc_match_total_list, c=mapnr)
+    plot[4].set_title('Percentage of matches found compared total number of features')
+
+    legend1 = plot[0].legend(*plot1.legend_elements(),
+                    loc="lower left", title="Map ID")
+    legend2 = plot[1].legend(*plot2.legend_elements(),
+                loc="lower left", title="Map ID")  
+    legend3 = plot[2].legend(*plot3.legend_elements(),
+                loc="lower left", title="Map ID")
+    legend4 = plot[3].legend(*plot4.legend_elements(),
+                loc="lower left", title="Map ID")
+    legend5 = plot[4].legend(*plot5.legend_elements(),
+                loc="lower left", title="Map ID")
+    plot[0].add_artist(legend1)
+    plot[1].add_artist(legend2)
+    plot[2].add_artist(legend3)
+    plot[3].add_artist(legend4)
+    plot[4].add_artist(legend5) 
+
+    plt.savefig(resultPath,format="png")
+    
+
+
 
 if __name__=="__main__":
     # parse command line
@@ -145,6 +256,8 @@ if __name__=="__main__":
     parser.add_argument('--plot', help='plot the first and the aligned second trajectory to an image (format: png)')
     parser.add_argument('--verbose', help='print all evaluation data (otherwise, only the RMSE absolute translational error in meters after alignment will be printed)', action='store_true')
     parser.add_argument('--verbose2', help='print scale eror and RMSE absolute translational error in meters after alignment with and without scale correction', action='store_true')
+    parser.add_argument('--iniFAST', help='initial FAST contrast parameter')
+    parser.add_argument('--minFAST', help='minimum FAST contrast parameter')
     args = parser.parse_args()
 
     first_list = associate.read_file_list(args.first_file, False)
@@ -161,37 +274,41 @@ if __name__=="__main__":
     second_xyz_full = numpy.matrix([[float(value)*float(args.scale) for value in sorted_second_list[i][1][0:3]] for i in range(len(sorted_second_list))]).transpose() # sorted_second_list.keys()]).transpose()
     rot,transGT,trans_errorGT,trans,trans_error, scale = align(second_xyz,first_xyz)
     
-    second_xyz_aligned = scale * rot * second_xyz + trans
+    second_xyz_aligned = scale * rot * second_xyz + transGT
     second_xyz_notscaled = rot * second_xyz + trans
-    second_xyz_notscaled_full = rot * second_xyz_full + trans
+    second_xyz_notscaled_full = rot * second_xyz_full + transGT
     first_stamps = first_list.keys()
-    first_stamps.sort()
+    #first_stamps.sort()
+    first_stamps = sorted(first_stamps)
     first_xyz_full = numpy.matrix([[float(value) for value in first_list[b][0:3]] for b in first_stamps]).transpose()
     
     second_stamps = second_list.keys()
-    second_stamps.sort()
+    #second_stamps.sort()
+    second_stamps = sorted(second_stamps)
     second_xyz_full = numpy.matrix([[float(value)*float(args.scale) for value in second_list[b][0:3]] for b in second_stamps]).transpose()
-    second_xyz_full_aligned = scale * rot * second_xyz_full + trans
+    second_xyz_full_aligned = scale * rot * second_xyz_full + transGT
+    
+    plot_feature_info(args.plot, args.iniFAST, args.minFAST)
     
     if args.verbose:
-        print "compared_pose_pairs %d pairs"%(len(trans_error))
+        print("compared_pose_pairs %d pairs"%(len(trans_error)))
 
-        print "absolute_translational_error.rmse %f m"%numpy.sqrt(numpy.dot(trans_error,trans_error) / len(trans_error))
-        print "absolute_translational_error.mean %f m"%numpy.mean(trans_error)
-        print "absolute_translational_error.median %f m"%numpy.median(trans_error)
-        print "absolute_translational_error.std %f m"%numpy.std(trans_error)
-        print "absolute_translational_error.min %f m"%numpy.min(trans_error)
-        print "absolute_translational_error.max %f m"%numpy.max(trans_error)
-        print "max idx: %i" %numpy.argmax(trans_error)
+        print("absolute_translational_error.rmse %f m"%numpy.sqrt(numpy.dot(trans_error,trans_error) / len(trans_error)))
+        print("absolute_translational_error.mean %f m"%numpy.mean(trans_error))
+        print("absolute_translational_error.median %f m"%numpy.median(trans_error))
+        print("absolute_translational_error.std %f m"%numpy.std(trans_error))
+        print("absolute_translational_error.min %f m"%numpy.min(trans_error))
+        print("absolute_translational_error.max %f m"%numpy.max(trans_error))
+        print("max idx: %i" %numpy.argmax(trans_error))
     else:
         # print "%f, %f " % (numpy.sqrt(numpy.dot(trans_error,trans_error) / len(trans_error)),  scale)
         # print "%f,%f" % (numpy.sqrt(numpy.dot(trans_error,trans_error) / len(trans_error)),  scale)
-        print "%f,%f,%f" % (numpy.sqrt(numpy.dot(trans_error,trans_error) / len(trans_error)), scale, numpy.sqrt(numpy.dot(trans_errorGT,trans_errorGT) / len(trans_errorGT)))
+        print("%f,%f,%f" % (numpy.sqrt(numpy.dot(trans_error,trans_error) / len(trans_error)), scale, numpy.sqrt(numpy.dot(trans_errorGT,trans_errorGT) / len(trans_errorGT))))
         # print "%f" % len(trans_error)
     if args.verbose2:
-        print "compared_pose_pairs %d pairs"%(len(trans_error))
-        print "absolute_translational_error.rmse %f m"%numpy.sqrt(numpy.dot(trans_error,trans_error) / len(trans_error))
-        print "absolute_translational_errorGT.rmse %f m"%numpy.sqrt(numpy.dot(trans_errorGT,trans_errorGT) / len(trans_errorGT))
+        print("compared_pose_pairs %d pairs"%(len(trans_error)))
+        print("absolute_translational_error.rmse %f m"%numpy.sqrt(numpy.dot(trans_error,trans_error) / len(trans_error)))
+        print("absolute_translational_errorGT.rmse %f m"%numpy.sqrt(numpy.dot(trans_errorGT,trans_errorGT) / len(trans_errorGT)))
 
     if args.save_associations:
         file = open(args.save_associations,"w")
@@ -211,12 +328,15 @@ if __name__=="__main__":
         from matplotlib.patches import Ellipse
         fig = plt.figure()
         ax = fig.add_subplot(111)
+        #plot_odom(ax,'-',"green","wheel odometry")
         plot_traj(ax,first_stamps,first_xyz_full.transpose().A,'-',"black","ground truth")
-        plot_traj(ax,second_stamps,second_xyz_full_aligned.transpose().A,'-',"blue","estimated")
+        plot_traj(ax,second_stamps,second_xyz_full_aligned.transpose().A,'--',"blue","estimated")
+        
+
         label="difference"
-        for (a,b),(x1,y1,z1),(x2,y2,z2) in zip(matches,first_xyz.transpose().A,second_xyz_aligned.transpose().A):
-            ax.plot([x1,x2],[y1,y2],'-',color="red",label=label)
-            label=""
+        #for (a,b),(x1,y1,z1),(x2,y2,z2) in zip(matches,first_xyz.transpose().A,second_xyz_aligned.transpose().A):
+        #    ax.plot([x1,x2],[y1,y2],'--',color="red",label=label)
+        #    label=""
             
         ax.legend()
             
