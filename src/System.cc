@@ -52,8 +52,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     "This is free software, and you are welcome to redistribute it" << endl <<
     "under certain conditions. See LICENSE.txt." << endl << endl;
 
-    std::vector<std::string> files_to_check = {"/home/meltem/thesis_orbslam/imgs_failed_tracking",
-                                     "/home/meltem/thesis_orbslam/matchingSTATS.txt"};
+    std::vector<std::string> files_to_check = {"/home/meltem/thesis_orbslam/matchingSTATS.txt"};
 
 
     for (const auto &file : files_to_check) {

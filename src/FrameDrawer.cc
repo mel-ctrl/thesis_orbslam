@@ -335,7 +335,7 @@ void FrameDrawer::SaveImg(cv::Mat &im, int nState){
     
 
     stringstream s;
-    s << "/home/meltem/ORB_SLAM3/imgs_failed_tracking/img_left_" << mSequence << "_" << nState << ".jpg";
+    s << "/home/meltem/thesis_orbslam/imgs_failed_tracking/img_left_" << mSequence << "_" << nState << ".jpg";
     std::string path = s.str();
     cv::imwrite(path, im);
 }

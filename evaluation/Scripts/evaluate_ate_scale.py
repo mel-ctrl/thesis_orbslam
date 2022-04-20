@@ -217,7 +217,7 @@ def plot_feature_info(plot_path,iniFast,minFast):
             nrinlier.insert(i, np.nan)
             perc_inl_match_list.insert(i,np.nan)
             perc_match_total_list.insert(i, np.nan)
-            mapnr.insert(i,np.nan)
+            mapnr.insert(i,-1)
     print(len(frame_list), len(nrfeatures))
     fig, plot = plt.subplots(6, figsize = (40,20))
     fig.suptitle("Feature matching statistics (iniThFAST = " + iniFast + " and minThFAST = " + minFast + ")")
