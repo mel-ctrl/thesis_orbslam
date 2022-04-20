@@ -169,13 +169,13 @@ def plot_odom(ax,style,color,label):
 
     ax.plot(traj_x,traj_y,style,color=color,label=label)
 
-def plot_feature_info(args.plot, args.iniFast, args.minFast):
+def plot_feature_info(plot_path,iniFast,minFast):
     import matplotlib.pyplot as plt
     import numpy as np
     from operator import truediv
     import os
-    file = os.path.dirname(os.getcwd()) + "/results/matchingSTATS.txt"
-    resultPath = args.plot.split('.')[0]+".png"
+    file = os.path.dirname(os.getcwd()) + "/thesis_orbslam/matchingSTATS.txt"
+    resultPath = plot_path.split('.')[0]+".png"
   
 
     timestamp = []
@@ -183,42 +183,67 @@ def plot_feature_info(args.plot, args.iniFast, args.minFast):
     nrfeatures = []
     nrmatches = []
     nrinlier = []
+    sequence = []
 
     with open(file) as f:
         for line in f:           
-            ts, map, nrfeat, nrmatch, nrinl = line.split(",")
+            seq, ts, map, nrfeat, nrmatch, nrinl = line.split(",")
+            sequence.append(int(seq))
             timestamp.append(float(ts))
             mapnr.append(float(map))
             nrfeatures.append(float(nrfeat))
             nrmatches.append(float(nrmatch))
             nrinlier.append(float(nrinl))
 
+
     f.close()
 
-    frame_list = np.linspace(0, len(timestamp), len(timestamp), dtype=int)
+    frame_list = np.linspace(1, max(sequence), max(sequence), dtype=int)
     perc_inl_match_list = [i / j * 100 for i, j in zip(nrinlier, nrmatches)]
     perc_match_total_list = [i / j * 100 for i, j in zip(nrmatches, nrfeatures)]
 
-    fig, plot = plt.subplots(5, figsize = (40,20))
-    fig.suptitle("Feature matching statistics (iniThFAST = 20 and minThFAST = 4)")
+    frame_signal = []
+    head = 0
+    for i in range(len(frame_list)):
+        expected = i + 1
+        if sequence[head] == expected:
+            head += 1
+            frame_signal.append(0)
+        else:
+            frame_signal.append(1)
+            
+            nrfeatures.insert(i, np.nan)
+            nrmatches.insert(i, np.nan)
+            nrinlier.insert(i, np.nan)
+            perc_inl_match_list.insert(i,np.nan)
+            perc_match_total_list.insert(i, np.nan)
+            mapnr.insert(i,np.nan)
+    print(len(frame_list), len(nrfeatures))
+    fig, plot = plt.subplots(6, figsize = (40,20))
+    fig.suptitle("Feature matching statistics (iniThFAST = " + iniFast + " and minThFAST = " + minFast + ")")
 
-    plot1 = plot[0].scatter(frame_list, nrfeatures, c=mapnr)
+    plot1 = plot[0].scatter(frame_list, nrfeatures, c=mapnr, plotnonfinite=True)
     plot[0].set_title('Number of features found in frame')
     plot[0].axis(ymin=0, ymax=max(nrfeatures))
 
-    plot2 = plot[1].scatter(frame_list, nrmatches, c=mapnr)
+    plot2 = plot[1].scatter(frame_list, nrmatches, c=mapnr, plotnonfinite=True)
     plot[1].set_title('Number of features matched to local map')
     
 
-    plot3 = plot[2].scatter(frame_list, nrinlier, c=mapnr)
+    plot3 = plot[2].scatter(frame_list, nrinlier, c=mapnr, plotnonfinite=True)
     plot[2].set_title('Number of inlier of the feature matches')
     plot[2].axhline(y=30, color='r', linestyle='-')
-    
-    plot4 = plot[3].scatter(frame_list, perc_inl_match_list, c=mapnr)
-    plot[3].set_title('Percentage of inliers compared total number of matches')
 
-    plot5 = plot[4].scatter(frame_list, perc_match_total_list, c=mapnr)
-    plot[4].set_title('Percentage of matches found compared total number of features')
+    plot4 = plot[3].plot(frame_list, frame_signal)
+    plot[3].set_title('missed frame signal')
+    
+    plot5 = plot[4].scatter(frame_list, perc_inl_match_list, c=mapnr, plotnonfinite=True)
+    plot[4].set_title('Percentage of inliers compared total number of matches')
+
+    plot6 = plot[5].scatter(frame_list, perc_match_total_list, c=mapnr, plotnonfinite=True)
+    plot[5].set_title('Percentage of matches found compared total number of features')
+
+
 
     legend1 = plot[0].legend(*plot1.legend_elements(),
                     loc="lower left", title="Map ID")
@@ -226,19 +251,18 @@ def plot_feature_info(args.plot, args.iniFast, args.minFast):
                 loc="lower left", title="Map ID")  
     legend3 = plot[2].legend(*plot3.legend_elements(),
                 loc="lower left", title="Map ID")
-    legend4 = plot[3].legend(*plot4.legend_elements(),
-                loc="lower left", title="Map ID")
     legend5 = plot[4].legend(*plot5.legend_elements(),
+                loc="lower left", title="Map ID")
+    legend6 = plot[5].legend(*plot6.legend_elements(),
                 loc="lower left", title="Map ID")
     plot[0].add_artist(legend1)
     plot[1].add_artist(legend2)
     plot[2].add_artist(legend3)
-    plot[3].add_artist(legend4)
-    plot[4].add_artist(legend5) 
+    plot[4].add_artist(legend5)
+    plot[5].add_artist(legend6) 
 
     plt.savefig(resultPath,format="png")
     
-
 
 
 if __name__=="__main__":
@@ -288,7 +312,7 @@ if __name__=="__main__":
     second_xyz_full = numpy.matrix([[float(value)*float(args.scale) for value in second_list[b][0:3]] for b in second_stamps]).transpose()
     second_xyz_full_aligned = scale * rot * second_xyz_full + transGT
     
-    plot_feature_info(args.plot, args.iniFAST, args.minFAST)
+    plot_feature_info(args.plot,args.iniFAST,args.minFAST)
     
     if args.verbose:
         print("compared_pose_pairs %d pairs"%(len(trans_error)))
