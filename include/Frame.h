@@ -19,7 +19,7 @@
 
 #ifndef FRAME_H
 #define FRAME_H
-
+#define REGISTER_ORB_EXTR
 #include<vector>
 
 #include "Thirdparty/DBoW2/DBoW2/BowVector.h"

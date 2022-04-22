@@ -58,6 +58,12 @@ Examples/ROS/ORB_SLAM3/build/
 evaluation/results
 imgs_failed_tracking
 matchingSTATS.txt
+kf_insert.txt
+kf_request.txt
+orbSTATS.txt
+relocalization.txt
+tracking_failure.txt
+track_request.txt
 
 FrameTrajectory_KITTI_Format.txt
 FrameTrajectory_TUM_Format.txt

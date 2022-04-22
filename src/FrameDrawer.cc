@@ -23,7 +23,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include<mutex>
-
+#include <filesystem>
 namespace ORB_SLAM3
 {
 
@@ -332,12 +332,19 @@ cv::Mat FrameDrawer::DrawRightFrame(float imageScale)
 }
 
 void FrameDrawer::SaveImg(cv::Mat &im, int nState){
-    
-
+    string folder = "/home/meltem/thesis_orbslam/imgs_failed_tracking";
+    filesystem::create_directories(folder);
     stringstream s;
-    s << "/home/meltem/thesis_orbslam/imgs_failed_tracking/img_left_" << mSequence << "_" << nState << ".jpg";
+    s << folder << "/img_left_" << mSequence << "_" << nState << ".jpg";
     std::string path = s.str();
     cv::imwrite(path, im);
+
+    #ifdef RECORD_TF_MESSAGE
+    ofstream trackfailfile;
+    trackfailfile.open("/home/meltem/thesis_orbslam/tracking_failure.txt", fstream::app);
+    trackfailfile << mSequence << "\n";
+    trackfailfile.close();
+    #endif
 }
 
 

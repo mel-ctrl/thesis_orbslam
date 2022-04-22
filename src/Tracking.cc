@@ -1793,6 +1793,12 @@ void Tracking::ResetFrameIMU()
 
 void Tracking::Track()
 {
+    #ifdef RECORD_TRACK_REQUEST
+    ofstream trackrequestfile;
+    trackrequestfile.open("/home/meltem/thesis_orbslam/track_request.txt", fstream::app);
+    trackrequestfile << mCurrentFrame.mSequence << "\n";
+    trackrequestfile.close();
+    #endif
 
     if (bStepByStep)
     {
@@ -3073,6 +3079,8 @@ bool Tracking::TrackLocalMap()
 
 bool Tracking::NeedNewKeyFrame()
 {
+
+
     if((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mpAtlas->GetCurrentMap()->isImuInitialized())
     {
         if (mSensor == System::IMU_MONOCULAR && (mCurrentFrame.mTimeStamp-mpLastKeyFrame->mTimeStamp)>=0.25)
@@ -3348,6 +3356,13 @@ void Tracking::CreateNewKeyFrame()
 
     mnLastKeyFrameId = mCurrentFrame.mnId;
     mpLastKeyFrame = pKF;
+
+    #ifdef RECORD_KF_INSERTION
+    ofstream kfinsertfile;
+    kfinsertfile.open("/home/meltem/thesis_orbslam/kf_insert.txt", fstream::app);
+    kfinsertfile << pKF->mSequence << "\n";
+    kfinsertfile.close();
+    #endif
 }
 
 void Tracking::SearchLocalPoints()
@@ -3781,6 +3796,12 @@ bool Tracking::Relocalization()
     {
         mnLastRelocFrameId = mCurrentFrame.mnId;
         cout << "Relocalized!!" << endl;
+        #ifdef RECORD_RL_MESSAGE
+        ofstream relocfile;
+        relocfile.open("/home/meltem/thesis_orbslam/relocalization.txt", fstream::app);
+        relocfile << mCurrentFrame.mSequence << "\n";
+        relocfile.close();
+        #endif
         return true;
     }
 

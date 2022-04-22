@@ -20,7 +20,10 @@
 #ifndef TRACKING_H
 #define TRACKING_H
 #define RECORD_MATCHING_STATS
-
+#define RECORD_RL_MESSAGE
+#define RECORD_TF_MESSAGE
+#define RECORD_KF_INSERTION
+#define RECORD_TRACK_REQUEST
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 

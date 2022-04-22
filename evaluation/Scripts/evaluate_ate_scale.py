@@ -41,6 +41,7 @@ This script computes the absolute trajectory error from the ground truth
 trajectory and the estimated trajectory.
 """
 
+from pickletools import read_float8
 from posixpath import split
 import sys
 from matplotlib.colors import Colormap
@@ -48,6 +49,7 @@ import numpy
 import argparse
 import associate
 import yaml
+from os.path import exists
 
 def align(model,data):
     """Align two trajectories using the method of Horn (closed-form).
@@ -174,7 +176,12 @@ def plot_feature_info(plot_path,iniFast,minFast):
     import numpy as np
     from operator import truediv
     import os
-    file = os.path.dirname(os.getcwd()) + "/thesis_orbslam/matchingSTATS.txt"
+    stats_file = os.path.dirname(os.getcwd()) + "/thesis_orbslam/matchingSTATS.txt"
+    reloc_file =  os.path.dirname(os.getcwd()) + "/thesis_orbslam/relocalization.txt"
+    tracking_fail_file =  os.path.dirname(os.getcwd()) + "/thesis_orbslam/tracking_failure.txt"
+    kf_request_file = os.path.dirname(os.getcwd()) + "/thesis_orbslam/kf_request.txt"
+    kf_insert_file = os.path.dirname(os.getcwd()) + "/thesis_orbslam/kf_insert.txt"
+    orb_file = os.path.dirname(os.getcwd()) + "/thesis_orbslam/orbSTATS.txt"
     resultPath = plot_path.split('.')[0]+".png"
   
 
@@ -185,7 +192,7 @@ def plot_feature_info(plot_path,iniFast,minFast):
     nrinlier = []
     sequence = []
 
-    with open(file) as f:
+    with open(stats_file) as f:
         for line in f:           
             seq, ts, map, nrfeat, nrmatch, nrinl = line.split(",")
             sequence.append(int(seq))
@@ -194,15 +201,49 @@ def plot_feature_info(plot_path,iniFast,minFast):
             nrfeatures.append(float(nrfeat))
             nrmatches.append(float(nrmatch))
             nrinlier.append(float(nrinl))
-
-
     f.close()
+
+    if exists(reloc_file):
+        reloc_sequence = []
+
+        with open(reloc_file) as rf:
+            for line in rf:
+                reloc_sequence.append(int(line.split(",\n")[0]))
+        rf.close()
+
+    tracking_fail_sequence = []
+
+    with open(tracking_fail_file) as tff:
+        for line in tff:
+            tracking_fail_sequence.append(int(line.split("\n")[0]))
+    tff.close()
+
+    kf_request_sequence = []
+
+    with open(kf_request_file) as kfr:
+        for line in kfr:
+            kf_request_sequence.append(int(line.split("\n")[0]))
+    kfr.close()
+
+    kf_insert_sequence = []
+
+    with open(kf_insert_file) as kfi:
+        for line in kfi:
+            kf_insert_sequence.append(int(line.split("\n")[0]))
+    kfi.close()
+
+    orb_sequence = []
+    with open(orb_file) as of:
+        for line in of:
+            orb_sequence.append(int(line.split(",")[0]))
+    of.close()
 
     frame_list = np.linspace(1, max(sequence), max(sequence), dtype=int)
     perc_inl_match_list = [i / j * 100 for i, j in zip(nrinlier, nrmatches)]
     perc_match_total_list = [i / j * 100 for i, j in zip(nrmatches, nrfeatures)]
 
     frame_signal = []
+    
     head = 0
     for i in range(len(frame_list)):
         expected = i + 1
@@ -218,30 +259,62 @@ def plot_feature_info(plot_path,iniFast,minFast):
             perc_inl_match_list.insert(i,np.nan)
             perc_match_total_list.insert(i, np.nan)
             mapnr.insert(i,-1)
-    print(len(frame_list), len(nrfeatures))
-    fig, plot = plt.subplots(6, figsize = (40,20))
+
+    orb_signal = []
+    head_orb = 1
+    frames_missed_orb = np.diff(orb_sequence)
+    for i in range(len(frame_list)):
+        expected = i+1
+        if orb_sequence[head_orb] == expected:
+            head_orb += 1
+            orb_signal.append(0)
+        else:      
+            orb_signal.append(frames_missed_orb[head_orb])
+            
+
+
+    fig, plot = plt.subplots(7, figsize = (40,20))
     fig.suptitle("Feature matching statistics (iniThFAST = " + iniFast + " and minThFAST = " + minFast + ")")
 
     plot1 = plot[0].scatter(frame_list, nrfeatures, c=mapnr, plotnonfinite=True)
     plot[0].set_title('Number of features found in frame')
-    plot[0].axis(ymin=0, ymax=max(nrfeatures))
+    #plot[0].axis(ymin=0, ymax=max(nrfeatures))
 
     plot2 = plot[1].scatter(frame_list, nrmatches, c=mapnr, plotnonfinite=True)
     plot[1].set_title('Number of features matched to local map')
-    
 
     plot3 = plot[2].scatter(frame_list, nrinlier, c=mapnr, plotnonfinite=True)
     plot[2].set_title('Number of inlier of the feature matches')
-    plot[2].axhline(y=30, color='r', linestyle='-')
+    plot[2].axhline(y=30, color='b', linestyle='-')
+    [plot[2].axvline(data, color='r', linestyle='--') for data in tracking_fail_sequence]
+    if exists(reloc_file):
+        [plot[2].axvline(data, color='g', linestyle='--') for data in reloc_sequence]
 
     plot4 = plot[3].plot(frame_list, frame_signal)
-    plot[3].set_title('missed frame signal')
-    
+    plot[3].set_title('non-used frames by local map tracker')
+    indices1 = [i for i, x in enumerate(frame_signal) if x == 1]
+    indices2 = [i for i, x in enumerate(orb_signal) if x == 1]
+    print(indices1)
+    print(indices2)
+
+
+
+
+    """"    
     plot5 = plot[4].scatter(frame_list, perc_inl_match_list, c=mapnr, plotnonfinite=True)
     plot[4].set_title('Percentage of inliers compared total number of matches')
 
     plot6 = plot[5].scatter(frame_list, perc_match_total_list, c=mapnr, plotnonfinite=True)
     plot[5].set_title('Percentage of matches found compared total number of features')
+    """
+
+    [plot[4].axvline(data, color='g', linestyle='-') for data in kf_request_sequence]
+    plot[4].set_title('frames that trigger tracking trough image callback')
+    [plot[5].axvline(data, color='g', linestyle='-') for data in kf_insert_sequence]
+    plot[5].set_title('keyframe insertion')
+
+    plot[6].plot(frame_list, orb_signal)
+    plot[6].set_title('frames missed by ORB extraction thread')
 
 
 
@@ -251,15 +324,17 @@ def plot_feature_info(plot_path,iniFast,minFast):
                 loc="lower left", title="Map ID")  
     legend3 = plot[2].legend(*plot3.legend_elements(),
                 loc="lower left", title="Map ID")
+    """
     legend5 = plot[4].legend(*plot5.legend_elements(),
                 loc="lower left", title="Map ID")
     legend6 = plot[5].legend(*plot6.legend_elements(),
                 loc="lower left", title="Map ID")
+    """
     plot[0].add_artist(legend1)
     plot[1].add_artist(legend2)
     plot[2].add_artist(legend3)
-    plot[4].add_artist(legend5)
-    plot[5].add_artist(legend6) 
+    #plot[4].add_artist(legend5)
+    #plot[5].add_artist(legend6) 
 
     plt.savefig(resultPath,format="png")
     

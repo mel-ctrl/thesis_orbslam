@@ -123,6 +123,14 @@ Frame::Frame(const int sequence, const cv::Mat &imLeft, const cv::Mat &imRight, 
     thread threadRight(&Frame::ExtractORB,this,1,imRight,0,0);
     threadLeft.join();
     threadRight.join();
+
+#ifdef REGISTER_ORB_EXTR
+    ofstream tfile;
+    tfile.open("/home/meltem/thesis_orbslam/orbSTATS.txt", fstream::app);
+    tfile << mSequence  << "\n";
+    tfile.close();
+#endif
+
 #ifdef REGISTER_TIMES
     std::chrono::steady_clock::time_point time_EndExtORB = std::chrono::steady_clock::now();
 

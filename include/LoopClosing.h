@@ -19,7 +19,7 @@
 
 #ifndef LOOPCLOSING_H
 #define LOOPCLOSING_H
-
+#define RECORD_LC_MESSAGE
 #include "KeyFrame.h"
 #include "LocalMapping.h"
 #include "Atlas.h"
@@ -119,7 +119,6 @@ public:
 protected:
 
     bool CheckNewKeyFrames();
-
 
     //Methods to implement the new place recognition algorithm
     bool NewDetectCommonRegions();

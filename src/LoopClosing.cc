@@ -71,6 +71,7 @@ LoopClosing::LoopClosing(Atlas *pAtlas, KeyFrameDatabase *pDB, ORBVocabulary *pV
 
 #endif
 
+
     mstrFolderSubTraj = "SubTrajectories/";
     mnNumCorrection = 0;
     mnCorrectionGBA = 0;
@@ -85,7 +86,7 @@ void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper)
 {
     mpLocalMapper=pLocalMapper;
 }
-
+    
 
 void LoopClosing::Run()
 {
@@ -227,6 +228,12 @@ void LoopClosing::Run()
                     vnPR_TypeRecogn.push_back(0);
 
                     Verbose::PrintMess("*Loop detected", Verbose::VERBOSITY_QUIET);
+                    #ifdef RECORD_LC_MESSAGE
+                    ofstream statsfile;
+                    statsfile.open("/home/meltem/thesis_orbslam/loopdetection.txt", fstream::app);
+                    statsfile <<  mpCurrentKF->mSequence << "\n";
+                    statsfile.close();
+                    #endif
 
                     mg2oLoopScw = mg2oLoopSlw; //*mvg2oSim3LoopTcw[nCurrentIndex];
                     if(mpCurrentKF->GetMap()->IsInertial())
