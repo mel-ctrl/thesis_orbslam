@@ -54,7 +54,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     std::vector<std::string> files_to_check = {"/home/meltem/thesis_orbslam/matchingSTATS.txt",
      "/home/meltem/thesis_orbslam/tracking_failure.txt", "/home/meltem/thesis_orbslam/relocalization.txt", "/home/meltem/thesis_orbslam/kf_insert.txt",
-     "/home/meltem/thesis_orbslam/track_request.txt", "/home/meltem/thesis_orbslam/imgs_failed_tracking", "/home/meltem/thesis_orbslam/orbSTATS.txt"};
+     "/home/meltem/thesis_orbslam/track_request.txt", "/home/meltem/thesis_orbslam/imgs_failed_tracking", "/home/meltem/thesis_orbslam/orbSTATS.txt", "/home/meltem/thesis_orbslam/imgs_all"};
 
 
     for (const auto &file : files_to_check) {

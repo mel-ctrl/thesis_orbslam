@@ -51,6 +51,7 @@ public:
     cv::Mat DrawFrame(float imageScale=1.f);
     cv::Mat DrawRightFrame(float imageScale=1.f);
     void SaveImg(cv::Mat &im, int nState);
+    void SaveAllImgs(cv::Mat &im);
     bool both;
 
 protected:

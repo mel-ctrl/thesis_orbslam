@@ -202,7 +202,7 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale)
         SaveImg(imWithInfo, state);
     }
 
-
+    SaveAllImgs(imWithInfo);
     return imWithInfo;
 }
 
@@ -346,6 +346,17 @@ void FrameDrawer::SaveImg(cv::Mat &im, int nState){
     trackfailfile.close();
     #endif
 }
+
+
+void FrameDrawer::SaveAllImgs(cv::Mat &im){
+    string folder = "/home/meltem/thesis_orbslam/imgs_all";
+    filesystem::create_directories(folder);
+    stringstream s;
+    s << folder << "/img_left_" << mSequence << ".jpg";
+    std::string path = s.str();
+    cv::imwrite(path, im);
+}
+
 
 
 void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
