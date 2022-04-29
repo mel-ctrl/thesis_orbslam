@@ -2056,10 +2056,12 @@ void Tracking::Track()
                     if(mbVelocity)
                     {
                         bOK = TrackWithMotionModel();
+                        
                     }
                     else
                     {
                         bOK = TrackReferenceKeyFrame();
+                        
                     }
                 }
                 else
@@ -2069,7 +2071,6 @@ void Tracking::Track()
                     // We compute two camera poses, one from motion model and one doing relocalization.
                     // If relocalization is sucessfull we choose that solution, otherwise we retain
                     // the "visual odometry" solution.
-
                     bool bOKMM = false;
                     bool bOKReloc = false;
                     vector<MapPoint*> vpMPsMM;
