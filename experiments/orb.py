@@ -24,6 +24,9 @@ class ORB:
         self.stats_folder = "/home/meltem/thesis_orbslam/experiments/stats/"
         self.histo_folder = "/home/meltem/thesis_orbslam/experiments/histograms/"
 
+        self.save_stats_folder = self.stats_folder + self.dataset
+        self.save_hist_folder = self.histo_folder + self.dataset
+
         if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
             self.save_extention = self.dataset + "/" + (self.source.split('/')[-1:][0]).split('.')[0]
             if  self.dataset == "flourish":
@@ -34,17 +37,12 @@ class ORB:
                 self.image_topic = "/daheng_camera_manager/left/image_rect"
         elif self.dataset == "euroc":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-5:][0])
-            self.save_stats_folder = self.stats_folder + self.dataset
-            self.save_hist_folder = self.histo_folder + self.dataset
         elif self.dataset == "seasons":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-4:][0]) + "/" + (self.source.split('/')[-3:][0])
             self.save_stats_folder = self.stats_folder + '/'.join(self.save_extension.split('/')[0:-2])
             self.save_hist_folder = self.histo_folder + '/'.join(self.save_extension.split('/')[0:-2])
         elif self.dataset == "kitti":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-2:][0])
-            self.save_stats_folder = self.stats_folder + self.dataset
-            self.save_hist_folder = self.histo_folder + self.dataset
-
 
         if not os.path.exists(self.save_stats_folder):
             os.makedirs(self.save_stats_folder)
@@ -92,7 +90,7 @@ class ORB:
             matchesMask = [[0,0] for i in range(len(self.matches[image]))]
             # ratio test as per Lowe's paper
             for i,(m,n) in enumerate(self.matches[image]):
-                if m.distance < 0.99*n.distance:
+                if m.distance < 0.8*n.distance:
                     matchesMask[i]=[1,0]
                     matches_good.append(m)
             self.matches_good.append(matches_good)
@@ -117,9 +115,9 @@ class ORB:
         plt.plot(xint, y)
         plt.axhline(np.mean(y), linestyle='--')
         print(pathlib.Path(__file__).parent.resolve())
-        plt.title("Amount of good matches per frame, std: {std}, \n mean: {mean}, median: {median}, \n minimum: {min}, spread: {spread}".format(std=np.std(y), mean=np.mean(y), median=np.median(y), min=min(y), spread = max(y)-min(y)))
-        plt.savefig(self.stats_folder + self.save_extension + "_patchsize_{patchsize}_fasttresh_{fasttresh}.png".format(patchsize=patchsize, fasttresh=fasttresh))
-        plt.clf()
+        plt.title("Amount of good matches per frame, std: {std}, \n mean: {mean}, median: {median}, \n minimum: {min}, spread: {spread}, \n patchsize: {patchsize}. fasttresh: {fasttresh}".format(std=np.std(y), mean=np.mean(y), median=np.median(y), min=min(y), spread = max(y)-min(y), patchsize=patchsize, fasttresh=fasttresh))
+        return np.mean(y), plt
+        
     def equalizeHist(self, img_gray):
         img = cv.equalizeHist(img_gray)
         return img
@@ -161,16 +159,26 @@ class ORB:
 
         sizes = [6, 12, 24, 48]
         fasttresh = [5, 10, 20, 50]
+        mean_prev = 0
         for i in range(len(sizes)):
             for j in range(len(fasttresh)):
                 orb = cv.ORB_create(nfeatures=2000, scaleFactor=1.2, nlevels=8, edgeThreshold=sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[i], fastThreshold=fasttresh[j])
                 self.findKeyPoints(orb)
                 #self.drawKeyPoints()
                 self.matchKeyPointsBF()
-                #self.matchKeyPointsFLANN()
-                
+                #self.matchKeyPointsFLANN() 
                 self.drawMatches(plot=False)
-                self.plotStats(sizes[i], fasttresh[j])
+
+                mean, plt = self.plotStats(sizes[i], fasttresh[j])
+                if mean_prev < mean:
+                    plt.savefig(self.stats_folder + self.save_extension + ".png")
+                mean_prev = mean
+
+                self.keypoints = []
+                self.descriptor = []
+                self.matches = []
+                self.matches_good = []
+                plt.close('all')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='''This script reads the dataset images or rosbag files and outputs the matches over time''')

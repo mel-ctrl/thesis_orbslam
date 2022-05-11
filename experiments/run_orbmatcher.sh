@@ -79,5 +79,28 @@ python $scriptPath seasons --source_dir "${seasonsPath}/neighborhood/loop5/disto
 python $scriptPath seasons --source_dir "${seasonsPath}/neighborhood/loop6/distorted_images/cam0"
 python $scriptPath seasons --source_dir "${seasonsPath}/neighborhood/loop7/distorted_images/cam0"
 
+python $scriptPath seasons --source_dir "${seasonsPath}/business_campus/loop1/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/business_campus/loop2/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/business_campus/loop3/distorted_images/cam0"
 
+python $scriptPath seasons --source_dir "${seasonsPath}/city_loop/loop1/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/city_loop/loop2/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/city_loop/loop3/distorted_images/cam0"
+
+python $scriptPath seasons --source_dir "${seasonsPath}/country_side/loop1/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/country_side/loop2/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/country_side/loop3/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/country_side/loop4/distorted_images/cam0"
+
+python $scriptPath seasons --source_dir "${seasonsPath}/maximalaneum/loop1/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/maximalaneum/loop2/distorted_images/cam0"
+
+python $scriptPath seasons --source_dir "${seasonsPath}/old_town/loop1/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/old_town/loop2/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/old_town/loop3/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/old_town/loop4/distorted_images/cam0"
+
+python $scriptPath seasons --source_dir "${seasonsPath}/parking_garage/loop1/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/parking_garage/loop2/distorted_images/cam0"
+python $scriptPath seasons --source_dir "${seasonsPath}/parking_garage/loop3/distorted_images/cam0"
 
