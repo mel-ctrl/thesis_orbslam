@@ -1,3 +1,4 @@
+from ast import parse
 from cv2 import ORB_HARRIS_SCORE, imshow
 import numpy as np
 import cv2 as cv
@@ -7,68 +8,57 @@ import yaml
 import rosbag
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-
+import argparse
+import pathlib
 
 class ORB:
-    def __init__(self, source_dir, settings_path, dataset, bag_file):
-        self.source_dir = source_dir
+    def __init__(self, dataset, source, equalize):
+        self.source = source
         self.images = []
-        self.orb = cv.ORB_create(nfeatures=1200, scaleFactor=1.2, nlevels=8, edgeThreshold=19, firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=31, fastThreshold=20)
         self.keypoints = []
         self.descriptor = []
         self.matches = []
         self.matches_good = []
         self.dataset = dataset
-        self.bag_file = bag_file
-        self.settings_path = settings_path
-        if self.dataset == "euroc":
-            self.mtx, self.dist = self.readSettings()
-        elif self.dataset == "flourish":
-            self.image_topic = "/sensor/camera/vi_sensor/left/image_raw"
-            self.mtx, self.dist = self.readSettings()
-        elif self.dataset == "rosario":
-            self.image_topic = "/stereo/left/image_raw"
-            self.mtx, self.dist = self.readSettings()
-                
+        self.equalize = equalize
+        self.stats_folder = "/home/meltem/thesis_orbslam/experiments/stats/"
+        self.histo_folder = "/home/meltem/thesis_orbslam/experiments/histograms/"
 
-    def readSettings(self):
-        if self.dataset == "flourish" or self.dataset == "rosario":
-            if self.dataset == "flourish":
-                camera_info_topic = "/sensor/camera/vi_sensor/left/camera_info"
+        if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
+            self.save_extention = self.dataset + "/" + (self.source.split('/')[-1:][0]).split('.')[0]
+            if  self.dataset == "flourish":
+                self.image_topic = "/sensor/camera/vi_sensor/left/image_raw"
             elif self.dataset == "rosario":
-                camera_info_topic = "/stereo/left/camera_info"
-            bag = rosbag.Bag(self.bag_file, "r")
-            i = 0
-            for topic, msg, t in bag.read_messages(topics=[camera_info_topic]):
-                bag.read_messages(topics=[camera_info_topic])
-                intrinsics = msg.K
-                distortion_coeff = msg.D
-                mtx = np.array([[intrinsics[0], intrinsics[1], intrinsics[2]], [intrinsics[3], intrinsics[4], intrinsics[5]],[intrinsics[6], intrinsics[7], intrinsics[8]]])
-                dist = np.asarray(distortion_coeff)
-                i+=1
-                if i == 1:
-                    break
-            return mtx, dist
-            
-
-        else:
-            with open(self.settings_path) as file: 
-                settings = yaml.full_load(file)
-                if self.dataset == "euroc":
-                    intrinsics = settings["intrinsics"]
-                    distortion_coeff = settings["distortion_coefficients"]
+                self.image_topic = "/stereo/left/image_raw"
+            elif self.dataset == "own":
+                self.image_topic = "/daheng_camera_manager/left/image_rect"
+        elif self.dataset == "euroc":
+            self.save_extension = self.dataset + "/" + (self.source.split('/')[-5:][0])
+            self.save_stats_folder = self.stats_folder + self.dataset
+            self.save_hist_folder = self.histo_folder + self.dataset
+        elif self.dataset == "seasons":
+            self.save_extension = self.dataset + "/" + (self.source.split('/')[-4:][0]) + "/" + (self.source.split('/')[-3:][0])
+            self.save_stats_folder = self.stats_folder + '/'.join(self.save_extension.split('/')[0:-2])
+            self.save_hist_folder = self.histo_folder + '/'.join(self.save_extension.split('/')[0:-2])
+        elif self.dataset == "kitti":
+            self.save_extension = self.dataset + "/" + (self.source.split('/')[-2:][0])
+            self.save_stats_folder = self.stats_folder + self.dataset
+            self.save_hist_folder = self.histo_folder + self.dataset
 
 
-                mtx = np.array([[intrinsics[0], 0, intrinsics[2]], [0, intrinsics[1], intrinsics[3]],[0, 0, 1]])
-                return mtx, np.asarray(distortion_coeff)
+        if not os.path.exists(self.save_stats_folder):
+            os.makedirs(self.save_stats_folder)
+        if not os.path.exists(self.save_hist_folder):
+            os.makedirs(self.save_hist_folder)
 
-    def findKeyPoints(self):
+    def findKeyPoints(self, orb):
         for img in self.images:
-            kp, des = self.orb.detectAndCompute(img, None)
+            kp, des = orb.detectAndCompute(img, None)
             self.keypoints.append(kp)
             self.descriptor.append(des)
 
     def drawKeyPoints(self):
+        plt.figure(3)
         img = cv.drawKeypoints(self.images[0], self.keypoints[0], None, color=(0,255,0), flags=0)
         plt.imshow(img)
         plt.show()
@@ -93,8 +83,6 @@ class ORB:
             for idx, match in enumerate(matches):
                 if len(match) < 2:
                     matches.pop(idx)
-                    print("bug happened")
-            
             self.matches.append(matches)
 
 
@@ -104,105 +92,92 @@ class ORB:
             matchesMask = [[0,0] for i in range(len(self.matches[image]))]
             # ratio test as per Lowe's paper
             for i,(m,n) in enumerate(self.matches[image]):
-                #print(image, i, len(self.matches[image]))
-                if m.distance < 0.7*n.distance:
+                if m.distance < 0.99*n.distance:
                     matchesMask[i]=[1,0]
                     matches_good.append(m)
-
             self.matches_good.append(matches_good)
 
-            if plot==True:           
+            if plot==True:
+                plt.figure(2)          
                 draw_params = dict(matchColor = (0,255,0),
                         singlePointColor = (255,0,0),
                         matchesMask = matchesMask,
                         flags = cv.DrawMatchesFlags_DEFAULT)
-
                 img = cv.drawMatchesKnn(self.images[image],self.keypoints[image],self.images[image+1],self.keypoints[image+1],self.matches[image],None,**draw_params)
                 plt.imshow(img)
                 plt.show()
 
-    def undistortImg(self, img):
-        h,  w = img.shape[:2]
-        newcameramtx, roi = cv.getOptimalNewCameraMatrix(self.mtx, self.dist, (w,h), 1, (w,h))
-        # undistort
-        dst = cv.undistort(img, self.mtx, self.dist, None, newcameramtx)
-        # crop the image
-        x, y, w, h = roi
-        dst = dst[y:y+h, x:x+w]
-        return dst
 
-    def plotStats(self):
+    def plotStats(self, patchsize, fasttresh):
+        plt.figure(1)
         y = []
         xint = range(0, len(self.matches_good))
         for i in xint:
             y.append(len(self.matches_good[i]))
         plt.plot(xint, y)
-        #e = y-np.mean(y)
-        print(y)
         plt.axhline(np.mean(y), linestyle='--')
-        #plt.errorbar(xint, y, e, linestyle='None', marker='^')
-        plt.title("Amount of good matches per frame, std: {std}, \n mean: {mean}, median: {median}, minimum: {min}, spread: {spread}".format(std=np.std(y), mean=np.mean(y), median=np.median(y), min=min(y), spread = max(y)-min(y)))
-        #plt.xticks(xint)
-        plt.show()
+        print(pathlib.Path(__file__).parent.resolve())
+        plt.title("Amount of good matches per frame, std: {std}, \n mean: {mean}, median: {median}, \n minimum: {min}, spread: {spread}".format(std=np.std(y), mean=np.mean(y), median=np.median(y), min=min(y), spread = max(y)-min(y)))
+        plt.savefig(self.stats_folder + self.save_extension + "_patchsize_{patchsize}_fasttresh_{fasttresh}.png".format(patchsize=patchsize, fasttresh=fasttresh))
+        plt.clf()
+    def equalizeHist(self, img_gray):
+        img = cv.equalizeHist(img_gray)
+        return img
 
-        
-
-
+    def plotHistogram(self, img_gray):
+        plt.figure(0)
+        histg = cv.calcHist([img_gray],[0],None,[256],[0,256])
+        plt.plot(histg)
+        plt.savefig(self.histo_folder + self.save_extension + ".png")
 
     def main(self):
-        if self.dataset == "flourish" or self.dataset == "rosario":
+        if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
             bag = rosbag.Bag(self.bag_file, "r")
             bridge = CvBridge()
             i = 0
             for topic, msg, t in bag.read_messages(topics=[self.image_topic]):
                 cv_img = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
                 if cv_img is not None:
-                    img_undistorted = self.undistortImg(cv_img) 
-                    self.images.append(img_undistorted)
-                    i+=1
-                    #if i == 6:
-                    #    break
+                    if cv_img.shape[-1] == 3:
+                        cv_img = cv.cvtColor(cv_img, cv.COLOR_BGR2GRAY)
+                    if self.equalize == True:
+                        cv_img = self.equalizeHist(cv_img)
+                    self.images.append(cv_img)
+                    #self.plotHistogram(cv_img)
+                #if len(self.images) == 5:
+                #    break
             bag.close()
 
-
-
         else:
-            for filename in os.listdir(self.source_dir):
-                img = cv.imread(os.path.join(self.source_dir,filename))
+            for filename in os.listdir(self.source):
+                img = cv.imread(os.path.join(self.source,filename))
                 if img is not None:
-                    #gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-                    img_undistorted = self.undistortImg(img) 
-                    self.images.append(img_undistorted)
-                if len(self.images) == 5:
-                    break
-        print(len(self.images))
-        self.findKeyPoints()
-        #self.drawKeyPoints()
-        #self.matchKeyPointsBF()
-        self.matchKeyPointsFLANN()
-        
-        self.drawMatches(plot=False)
-        self.plotStats()
+                    if img.shape[-1] == 3:
+                        img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                    if self.equalize == True:
+                        img = self.equalizeHist(img)
+                    self.images.append(img)
+                    #self.plotHistogram(img)
+
+        sizes = [6, 12, 24, 48]
+        fasttresh = [5, 10, 20, 50]
+        for i in range(len(sizes)):
+            for j in range(len(fasttresh)):
+                orb = cv.ORB_create(nfeatures=2000, scaleFactor=1.2, nlevels=8, edgeThreshold=sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[i], fastThreshold=fasttresh[j])
+                self.findKeyPoints(orb)
+                #self.drawKeyPoints()
+                self.matchKeyPointsBF()
+                #self.matchKeyPointsFLANN()
+                
+                self.drawMatches(plot=False)
+                self.plotStats(sizes[i], fasttresh[j])
 
 if __name__ == "__main__":
-    #-------------------------------ROSARIO-------------------------------------------------
-    dataset = "rosario"
-    bag_file = "/media/meltem/T7/Meltem/Thesis/Datasets/Rosario/sequence02.bag"
-    source_dir = ""
-    settings_path = ""
-
-
-    #-------------------------------EUROC-------------------------------------------------
-    #dataset = "euroc"
-    #source_dir = "/media/meltem/T7/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/data"
-    #settings_path = "/media/meltem/T7/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/sensor.yaml"
-
-    #-------------------------------FLOURISH-------------------------------------------------
-    
-    #dataset= "flourish"
-    #bag_file = "/media/meltem/T7/Meltem/Thesis/Datasets/Flourish/DatasetA.bag"
-    #source_dir = ""
-    #settings_path = ""
-
-    object = ORB(source_dir, settings_path, dataset, bag_file)
+    parser = argparse.ArgumentParser(description='''This script reads the dataset images or rosbag files and outputs the matches over time''')
+    parser.add_argument('--dataset', help='euroc, flourish, rosario, kitti, 4seasons, own')
+    parser.add_argument('--source', help='specify source bag file or folder', default="")
+    parser.add_argument('--equalize', help='Histogram equalization, True or False', default=False)
+    #args = parser.parse_args()
+    args = parser.parse_args(["--dataset", "euroc", "--source", "/media/meltem/moo/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/data/"])
+    object = ORB(args.dataset, args.source, args.equalize)
     object.main()
