@@ -32,6 +32,7 @@ class ORB:
         self.target_width, self.target_height = 672, 376
         self.ds_fps = bool(ds_fps)
         self.ds_resolution = bool(ds_resolution)
+        self.track_error = 0
 
         if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-1:][0]).split('.')[0]
@@ -60,14 +61,15 @@ class ORB:
             os.makedirs(self.save_stats_folder)
         if not os.path.exists(self.save_hist_folder):
             os.makedirs(self.save_hist_folder)
-        if os.path.exists(self.statsfile):
-            os.remove(self.statsfile)
+        #if os.path.exists(self.statsfile):
+        #    os.remove(self.statsfile)
 
     def findKeyPoints(self, orb):
         for img in self.images:
             kp, des = orb.detectAndCompute(img, None)
-            self.keypoints.append(kp)
-            self.descriptor.append(des)
+            if len(kp) != 0 and len(des) != 0:
+                self.keypoints.append(kp)
+                self.descriptor.append(des)
 
     def drawKeyPoints(self):
         plt.figure(3)
@@ -118,12 +120,22 @@ class ORB:
                 img = cv.drawMatchesKnn(self.images[image],self.keypoints[image],self.images[image+1],self.keypoints[image+1],self.matches[image],None,**draw_params)
                 plt.imshow(img)
                 plt.show()
+        if len(self.matches_good) < 20:
+            self.track_error += 1
 
     def calculateFlow(self):
         for i in range(len(self.images)-1):
             flow = cv.calcOpticalFlowFarneback(self.images[i], self.images[i+1], None, 0.5, 3, 15, 3, 5, 1.2, 0)
-            mag, ang = cv.cartToPolar(flow[..., 0], flow[..., 1])
+            #mag, ang = cv.cartToPolar(flow[..., 0], flow[..., 1])
+            mag, ang = self.cartToPol(flow[..., 0], flow[..., 1])
             self.flow.append(np.mean(mag))
+
+
+    def cartToPol(self, x, y):
+        ang = np.arctan2(y, x)
+        mag = np.hypot(x, y)
+        return mag, ang
+
 
     def variance_of_laplacian(self, image):
         return cv.Laplacian(image, cv.CV_64F).var()
@@ -142,10 +154,10 @@ class ORB:
         flow_spread = np.max(self.flow)-np.min(self.flow)
 
         file = open(self.statsfile, "a")
-        file.write(self.save_extension + "\n Matching \n std: {match_std}, mean: {match_mean}, median: {match_median}, minimum: {match_min}, \
+        file.write(self.save_extension + "\n Matching \n track_errors: {track_error}, std: {match_std}, mean: {match_mean}, median: {match_median}, minimum: {match_min}, \
         spread: {match_spread}, patchsize: {patchsize}, fasttresh: {fasttresh} \n Blur \n std: {blur_std}, mean: {blur_mean}, median: {blur_median}, maximum: {blur_max}, \
         spread: {blur_spread} \n Flow \n std: {flow_std}, mean: {flow_mean}, median: {flow_median}, maximum: {flow_max}, \
-        spread: {flow_spread} \n \n".format(match_std=match_std, match_mean=match_mean, match_median=match_median, match_min=match_minimum, match_spread=match_spread, \
+        spread: {flow_spread} \n \n".format(track_error=self.track_error, match_std=match_std, match_mean=match_mean, match_median=match_median, match_min=match_minimum, match_spread=match_spread, \
             patchsize=patchsize, fasttresh=fasttresh, blur_std=blur_std, blur_mean=blur_mean, blur_median=blur_median, blur_max=blur_max, blur_spread=blur_spread, flow_std=flow_std, \
                 flow_mean=flow_mean, flow_median=flow_median, flow_max=flow_max, flow_spread=flow_spread))
 
@@ -191,6 +203,12 @@ class ORB:
         self.images.append(img)
         self.blur.append(self.variance_of_laplacian(img))
 
+    def plotEffectSettings(self, patchsize, fasttresh, mean, index):
+        plt.figure(4)
+        plt.scatter(index, mean, label="Patch size: {patchsize}, Fast treshold {fasttresh}".format(patchsize=patchsize, fasttresh=fasttresh))
+        plt.legend()
+        return plt
+
     def main(self):
         print("Dataset: {dataset}".format(dataset=self.save_extension))
         i = 0
@@ -199,7 +217,7 @@ class ORB:
             bridge = CvBridge()
             for topic, msg, t in bag.read_messages(topics=[self.image_topic]):
                 cv_img = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
-                if cv_img is not None:
+                if cv_img is not None and len(cv_img) != 0:
                     if self.ds_fps and (self.fps != self.target_fps):
                         i +=1
                         if i % (self.fps/(self.fps-self.target_fps)) != 0:
@@ -211,7 +229,7 @@ class ORB:
         else:
             for filename in os.listdir(self.source):
                 img = cv.imread(os.path.join(self.source,filename))
-                if img is not None:
+                if img is not None and len(img) != 0:
                     if self.ds_fps and (self.fps != self.target_fps):
                         i +=1
                         if i % (self.fps/(self.fps-self.target_fps)) != 0:
@@ -236,9 +254,10 @@ class ORB:
         best_patchsize = 0
         best_fasttresh = 0
         best_plt = None
+        index = 0
         for i in range(len(sizes)):
             for j in range(len(fasttresh)):
-                
+                index+=1
                 print("Matching features for patch size {size} and fast treshold {tresh}".format(size=sizes[i], tresh=fasttresh[j]))
                 orb = cv.ORB_create(nfeatures=2000, scaleFactor=1.2, nlevels=8, edgeThreshold=sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[i], fastThreshold=fasttresh[j])
                 self.findKeyPoints(orb)
@@ -246,6 +265,7 @@ class ORB:
                 self.filterMatches(plot=False)
 
                 match_std, match_mean, match_median, match_spread, match_min, plt = self.plotStats(sizes[i], fasttresh[j])
+                settings_plot = self.plotEffectSettings(sizes[i], fasttresh[j], match_mean, index)
                 if mean_prev < match_mean:
                     best_std = match_std
                     best_mean = match_mean
@@ -259,6 +279,7 @@ class ORB:
                 if i == (len(sizes)-1) and j == (len(fasttresh)-1):
                     best_plt.savefig(self.stats_folder + self.save_extension + ".png")
                     self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
+                    settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
                
                 mean_prev = match_mean
                 self.keypoints = []
@@ -274,8 +295,15 @@ if __name__ == "__main__":
     parser.add_argument('--equalize', help='Histogram equalization, True or False', default=False)
     parser.add_argument('--ds_fps', help='Downsample fps to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
-    args = parser.parse_args()
-    #args = parser.parse_args(["--dataset", "kitti", "--source", "/media/meltem/moo/Meltem/Thesis/Datasets/kitti/data_odometry_color/dataset/sequences/03/image_2", "--ds_fps", "True"])
+    #args = parser.parse_args()
+    args = parser.parse_args(["euroc", "--source", "/media/meltem/moo/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/data", "--ds_fps", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution))
     object.main()
+
+    #scatterplot met effecten van verschillende orb settings maken.
+    # plots maken met behaviour vana mount of tracking failures in ORB-SLAM vs statistics van de dataset om te kijken welke een indicatie is van
+    # tracking failure (mean, min, spread?)
+    #performance metric: hoe vaak matches onder 20 komen.
+    #own data with distorted view?
+    # use frequentist approach
