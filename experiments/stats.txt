@@ -1,8 +1,0 @@
-euroc/MH01
- Matching 
- track_errors: 0, std: 465.1, mean: 840.2, median: 894.0, minimum: 20,         spread: 1834, patchsize: 48, fasttresh: 5 
- Blur 
- std: 224.9, mean: 624.5, median: 619.9961186908096, maximum: 1261.6083197569178,         spread: 1117.3908595061284 
- Flow 
- std: 7.0, mean: 9.300000190734863, median: 7.719603538513184, maximum: 42.57375717163086,         spread: 42.52645492553711 
- 

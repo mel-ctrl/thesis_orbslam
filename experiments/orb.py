@@ -72,10 +72,10 @@ class ORB:
                 self.descriptor.append(des)
 
     def drawKeyPoints(self):
-        plt.figure(3)
+        keypoint_plot = plt.figure(3)
         img = cv.drawKeypoints(self.images[0], self.keypoints[0], None, color=(0,255,0), flags=0)
         plt.imshow(img)
-        plt.show()
+        keypoint_plot.show()
 
     def matchKeyPointsBF(self):
         bf = cv.BFMatcher()
@@ -163,7 +163,7 @@ class ORB:
 
 
     def plotStats(self, patchsize, fasttresh):
-        plt.figure(1)
+        stats_plot = plt.figure(1)
         y = []
         xint = range(0, len(self.matches_good))
         for i in xint:
@@ -181,7 +181,7 @@ class ORB:
 
         plt.title("std: {std}, mean: {mean}, median: {median}, \n minimum: {min}, spread: {spread}, \n patchsize: {patchsize}. fasttresh: {fasttresh}".format(std=std, mean=mean, median=median, min=min, spread = spread, patchsize=patchsize, fasttresh=fasttresh))
         
-        return std, mean, median, spread, min, plt
+        return std, mean, median, spread, min, stats_plot
         
     def equalizeHist(self, img_gray):
         img = cv.equalizeHist(img_gray)
@@ -203,11 +203,23 @@ class ORB:
         self.images.append(img)
         self.blur.append(self.variance_of_laplacian(img))
 
-    def plotEffectSettings(self, patchsize, fasttresh, mean, index):
-        plt.figure(4)
-        plt.scatter(index, mean, label="Patch size: {patchsize}, Fast treshold {fasttresh}".format(patchsize=patchsize, fasttresh=fasttresh))
-        plt.legend()
-        return plt
+    def plotEffectSettings(self, settings, mean, index, minimum):
+        effect_plot= plt.figure(4)
+        effect_plot, axes = plt.subplots(nrows = 1, ncols = 2, sharex=True)
+        
+        axes[0].scatter(index, mean)
+        axes[0].set_xlabel('Setting')
+        axes[0].set_ylabel('Mean')
+        axes[0].set_xticks(index)
+        axes[0].set_xticklabels(settings,rotation=90)
+        axes[1].scatter(index, minimum)
+        axes[1].set_xlabel('Setting')
+        axes[1].set_ylabel('Minimum')
+        axes[1].set_xticks(index)
+        axes[1].set_xticklabels(settings,rotation=90)
+
+        plt.tight_layout()
+        return effect_plot
 
     def main(self):
         print("Dataset: {dataset}".format(dataset=self.save_extension))
@@ -237,7 +249,6 @@ class ORB:
                     else:
                         self.addImages(img)
 
-
         print("Read all images")
 
         print('Calculating optical flow between all images')
@@ -245,7 +256,6 @@ class ORB:
 
         sizes = [6, 12, 24, 48]
         fasttresh = [5, 10, 20, 50]
-        mean_prev = 0
         best_std = 0
         best_mean = 0
         best_median = 0
@@ -255,6 +265,10 @@ class ORB:
         best_fasttresh = 0
         best_plt = None
         index = 0
+        effect_plot_index = []
+        effect_plot_settings = []
+        effect_plot_match_mean = []
+        effect_plot_match_min = []
         for i in range(len(sizes)):
             for j in range(len(fasttresh)):
                 index+=1
@@ -264,9 +278,12 @@ class ORB:
                 self.matchKeyPointsBF() 
                 self.filterMatches(plot=False)
 
-                match_std, match_mean, match_median, match_spread, match_min, plt = self.plotStats(sizes[i], fasttresh[j])
-                settings_plot = self.plotEffectSettings(sizes[i], fasttresh[j], match_mean, index)
-                if mean_prev < match_mean:
+                match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[i], fasttresh[j])
+                effect_plot_index.append(index)
+                effect_plot_settings.append((sizes[i], fasttresh[j]))
+                effect_plot_match_mean.append(match_mean)
+                effect_plot_match_min.append(match_min)
+                if best_min < match_min:
                     best_std = match_std
                     best_mean = match_mean
                     best_median = match_median
@@ -274,14 +291,14 @@ class ORB:
                     best_min = match_min
                     best_patchsize = sizes[i]
                     best_fasttresh = fasttresh[j]
-                    best_plt = plt
+                    best_plt = stats_plot
 
                 if i == (len(sizes)-1) and j == (len(fasttresh)-1):
                     best_plt.savefig(self.stats_folder + self.save_extension + ".png")
                     self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
+                    settings_plot = self.plotEffectSettings(effect_plot_settings, effect_plot_match_mean, effect_plot_index, effect_plot_match_min)
                     settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
-               
-                mean_prev = match_mean
+                self.track_error = 0
                 self.keypoints = []
                 self.descriptor = []
                 self.matches = []
@@ -295,8 +312,8 @@ if __name__ == "__main__":
     parser.add_argument('--equalize', help='Histogram equalization, True or False', default=False)
     parser.add_argument('--ds_fps', help='Downsample fps to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
-    #args = parser.parse_args()
-    args = parser.parse_args(["euroc", "--source", "/media/meltem/moo/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/data", "--ds_fps", "False"])
+    args = parser.parse_args()
+    #args = parser.parse_args(["euroc", "--source", "/media/meltem/moo/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/data", "--ds_fps", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution))
     object.main()
@@ -306,4 +323,4 @@ if __name__ == "__main__":
     # tracking failure (mean, min, spread?)
     #performance metric: hoe vaak matches onder 20 komen.
     #own data with distorted view?
-    # use frequentist approach
+    # use frequentist approach, independent t-test (check conditions first; Independence of observations, Homogeneity of variance, Normality of data)
