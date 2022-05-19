@@ -23,7 +23,7 @@ class ORB:
         self.equalize = bool(equalize)
         self.stats_folder = "/home/meltem/thesis_orbslam/experiments/stats/"
         self.histo_folder = "/home/meltem/thesis_orbslam/experiments/histograms/"
-        self.statsfile =  "/home/meltem/thesis_orbslam/experiments/stats.txt"
+        self.statsfile =  "/home/meltem/thesis_orbslam/experiments/stats.yaml"
         self.save_stats_folder = self.stats_folder + self.dataset
         self.save_hist_folder = self.histo_folder + self.dataset
         self.blur = []
@@ -59,10 +59,8 @@ class ORB:
 
         if not os.path.exists(self.save_stats_folder):
             os.makedirs(self.save_stats_folder)
-        if not os.path.exists(self.save_hist_folder):
-            os.makedirs(self.save_hist_folder)
-        #if os.path.exists(self.statsfile):
-        #    os.remove(self.statsfile)
+        #if not os.path.exists(self.save_hist_folder):
+        #    os.makedirs(self.save_hist_folder)
 
     def findKeyPoints(self, orb):
         for img in self.images:
@@ -144,23 +142,21 @@ class ORB:
         blur_std = round(np.std(self.blur),1)
         blur_mean = round(np.mean(self.blur),1)
         blur_median=np.median(self.blur)
-        blur_max=np.max(self.blur)
+        blur_maximum=np.max(self.blur)
         blur_spread = np.max(self.blur)-np.min(self.blur)
 
         flow_std = round(np.std(self.flow),1)
         flow_mean = round(np.mean(self.flow),1)
         flow_median=np.median(self.flow)
-        flow_max=np.max(self.flow)
+        flow_maximum=np.max(self.flow)
         flow_spread = np.max(self.flow)-np.min(self.flow)
-
-        file = open(self.statsfile, "a")
-        file.write(self.save_extension + "\n Matching \n track_errors: {track_error}, std: {match_std}, mean: {match_mean}, median: {match_median}, minimum: {match_min}, \
-        spread: {match_spread}, patchsize: {patchsize}, fasttresh: {fasttresh} \n Blur \n std: {blur_std}, mean: {blur_mean}, median: {blur_median}, maximum: {blur_max}, \
-        spread: {blur_spread} \n Flow \n std: {flow_std}, mean: {flow_mean}, median: {flow_median}, maximum: {flow_max}, \
-        spread: {flow_spread} \n \n".format(track_error=self.track_error, match_std=match_std, match_mean=match_mean, match_median=match_median, match_min=match_minimum, match_spread=match_spread, \
-            patchsize=patchsize, fasttresh=fasttresh, blur_std=blur_std, blur_mean=blur_mean, blur_median=blur_median, blur_max=blur_max, blur_spread=blur_spread, flow_std=flow_std, \
-                flow_mean=flow_mean, flow_median=flow_median, flow_max=flow_max, flow_spread=flow_spread))
-
+        
+        data_dict = {'track_error': int(self.track_error), 'match_mean': float(match_mean), 'match_std': float(match_std), 'match_median': float(match_median), 'match_minimum': int(match_minimum), \
+            'match_spread': int(match_spread), 'patchsize': int(patchsize), 'fasttresh': int(fasttresh), 'blur_mean': float(blur_mean), 'blur_std': float(blur_std), 'blur_median': float(blur_median), 'blur_maximum': float(blur_maximum), 'blur_spread': float(blur_spread), 'flow_mean': float(flow_mean), 'flow_std': float(flow_std), 'flow_median': float(flow_median), 'flow_maximum': float(flow_maximum), 'flow_spread': float(flow_spread)}
+        #data = {self.save_extension : {'Matching':matching_dict, 'Blur':blur_dict, 'Flow': flow_dict}}
+        data = {self.save_extension : data_dict}
+        with open(self.statsfile, "a") as file:
+            yaml.dump(data, file)
 
     def plotStats(self, patchsize, fasttresh):
         stats_plot = plt.figure(1)

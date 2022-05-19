@@ -20,11 +20,11 @@ python $scriptPath rosario --source "${rosarioPath}/sequence06.bag" $otherArgs
 
 python $scriptPath flourish --source "${flourishPath}/DatasetA.bag" $otherArgs
 python $scriptPath flourish --source "${flourishPath}/DatasetB.bag" $otherArgs
-
+: '
 python $scriptPath own --source "${ownPath}/concrete.bag" $otherArgs
 python $scriptPath own --source "${ownPath}/farm.bag" $otherArgs
 python $scriptPath own --source "${ownPath}/grass.bag" $otherArgs
-
+'
 
 python $scriptPath kitti --source "${kittiPath}/data_odometry_color/dataset/sequences/00/image_2" $otherArgs
 python $scriptPath kitti --source "${kittiPath}/data_odometry_color/dataset/sequences/01/image_2" $otherArgs

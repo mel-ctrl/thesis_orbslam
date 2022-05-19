@@ -1,0 +1,14 @@
+Two group: Datasets with and without manipulation
+	- Does histogram equalization have affect on the matching performance? (Compare means)
+	- Does fps downsampling have effect on the matching performance (Compare means)
+	- Does resolution downsampling have effect on the matching performance (Compare means)
+
+Two groups: agricultural (Rosario, Flourish, Own) and non-agricultural. 
+	- Compare spreads for robustness (Are there large differences in matching performance happen between some frames in one group compared to the other group)
+	- Compare std to see the average deviation from the mean for each group. On average, how much does the matching performance deviate from the mean compared to the other group?
+	- Does one group have a frame that is much harder than the frames in the other group? Compare minimum matching values
+	- Compare medians to see what the typical matching performance is for both groups and if they differ
+	
+Plots:
+	Is there a correlation between the maximum flow and maximum blur and the minimum matching performance? (correlation coefs)
+	Is there a correlation between the median flow, median blur and median matching performance? (correlation coefs)
