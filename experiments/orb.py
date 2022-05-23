@@ -78,8 +78,11 @@ class ORB:
     def matchKeyPointsBF(self):
         bf = cv.BFMatcher()
         for i in range(len(self.images)-1):
-            matches = bf.knnMatch(self.descriptor[i], self.descriptor[i+1], k=2)
-            self.matches.append(matches)
+            try:
+                matches = bf.knnMatch(self.descriptor[i], self.descriptor[i+1], k=2)
+                self.matches.append(matches)
+            except:
+                continue
 
     def matchKeyPointsFLANN(self):
         FLANN_INDEX_LSH = 6
@@ -251,7 +254,7 @@ class ORB:
         self.calculateFlow()
 
         sizes = [6, 12, 24, 48]
-        fasttresh = [5, 10, 20, 50]
+        fasttresh = [5, 10, 20, 40]
         best_std = 0
         best_mean = 0
         best_median = 0
