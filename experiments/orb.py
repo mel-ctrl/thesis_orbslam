@@ -12,7 +12,7 @@ import argparse
 import pathlib
 
 class ORB:
-    def __init__(self, dataset, source, equalize, ds_fps, ds_resolution):
+    def __init__(self, dataset, source, equalize, ds_fps, ds_resolution, save_video):
         self.source = source
         self.images = []
         self.keypoints = []
@@ -33,7 +33,8 @@ class ORB:
         self.ds_fps = bool(ds_fps)
         self.ds_resolution = bool(ds_resolution)
         self.track_error = 0
-
+        self.save_video = bool(save_video)
+        
         if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-1:][0]).split('.')[0]
             if  self.dataset == "flourish":
@@ -57,10 +58,11 @@ class ORB:
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-2:][0])
             self.fps = 10
 
+        video_dir = self.stats_folder + "videos/" + self.save_extension
         if not os.path.exists(self.save_stats_folder):
             os.makedirs(self.save_stats_folder)
-        #if not os.path.exists(self.save_hist_folder):
-        #    os.makedirs(self.save_hist_folder)
+        if not os.path.exists(video_dir):
+            os.makedirs(video_dir)
 
     def findKeyPoints(self, orb):
         for img in self.images:
@@ -101,7 +103,7 @@ class ORB:
             self.matches.append(matches)
 
 
-    def filterMatches(self, plot):
+    def filterMatches(self, plot, out):
         for image in range(len(self.images)-1):
             matches_good = []
             matchesMask = [[0,0] for i in range(len(self.matches[image]))]
@@ -112,17 +114,26 @@ class ORB:
                     matches_good.append(m)
             self.matches_good.append(matches_good)
 
-            if plot==True:
-                plt.figure(2)          
+            if plot or self.save_video:
                 draw_params = dict(matchColor = (0,255,0),
                         singlePointColor = (255,0,0),
                         matchesMask = matchesMask,
                         flags = cv.DrawMatchesFlags_DEFAULT)
                 img = cv.drawMatchesKnn(self.images[image],self.keypoints[image],self.images[image+1],self.keypoints[image+1],self.matches[image],None,**draw_params)
-                plt.imshow(img)
-                plt.show()
+                if plot==True:
+                    plt.figure(2)          
+                    plt.imshow(img)
+                    plt.show()
+                if self.save_video:
+                    out.write(img)
+
+
         if len(self.matches_good) < 20:
             self.track_error += 1
+        
+        out.release()
+        cv.destroyAllWindows()
+        
 
     def calculateFlow(self):
         for i in range(len(self.images)-1):
@@ -219,6 +230,15 @@ class ORB:
 
         plt.tight_layout()
         return effect_plot
+    
+    def removeNonBestVideos(self, patchsize, fasttresh):
+        folder = self.stats_folder + "videos/" + self.save_extension
+        for file in os.listdir(folder):
+            if (str(patchsize) + "_" + str(fasttresh) + ".avi") in file:
+                continue
+            else:
+                os.remove(folder + "/" + file)
+
 
     def main(self):
         print("Dataset: {dataset}".format(dataset=self.save_extension))
@@ -227,14 +247,14 @@ class ORB:
             bag = rosbag.Bag(self.source, "r")
             bridge = CvBridge()
             for topic, msg, t in bag.read_messages(topics=[self.image_topic]):
-                cv_img = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
-                if cv_img is not None and len(cv_img) != 0:
+                img = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
+                if img is not None and len(img) != 0:
                     if self.ds_fps and (self.fps != self.target_fps):
                         i +=1
                         if i % (self.fps/(self.fps-self.target_fps)) != 0:
-                            self.addImages(cv_img)
+                            self.addImages(img)
                     else:
-                        self.addImages(cv_img)
+                        self.addImages(img)
             bag.close()
 
         else:
@@ -247,6 +267,8 @@ class ORB:
                             self.addImages(img)
                     else:
                         self.addImages(img)
+                if len(self.images) == 50:
+                    break
 
         print("Read all images")
 
@@ -270,12 +292,15 @@ class ORB:
         effect_plot_match_min = []
         for i in range(len(sizes)):
             for j in range(len(fasttresh)):
+                if self.save_video:
+                    fourcc = cv.VideoWriter_fourcc(*'MJPG')
+                    out = cv.VideoWriter((self.stats_folder + "videos/" + self.save_extension + "/" + str(sizes[i]) + "_" + str(fasttresh[j]) + ".avi"), fourcc, self.target_fps, (img.shape[1]*2, img.shape[0]))
                 index+=1
                 print("Matching features for patch size {size} and fast treshold {tresh}".format(size=sizes[i], tresh=fasttresh[j]))
                 orb = cv.ORB_create(nfeatures=2000, scaleFactor=1.2, nlevels=8, edgeThreshold=sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[i], fastThreshold=fasttresh[j])
                 self.findKeyPoints(orb)
                 self.matchKeyPointsBF() 
-                self.filterMatches(plot=False)
+                self.filterMatches(plot=False, out=out)
 
                 match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[i], fasttresh[j])
                 effect_plot_index.append(index)
@@ -292,17 +317,20 @@ class ORB:
                     best_fasttresh = fasttresh[j]
                     best_plt = stats_plot
 
+
                 if i == (len(sizes)-1) and j == (len(fasttresh)-1):
                     best_plt.savefig(self.stats_folder + self.save_extension + ".png")
                     self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
                     settings_plot = self.plotEffectSettings(effect_plot_settings, effect_plot_match_mean, effect_plot_index, effect_plot_match_min)
                     settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
+                    self.removeNonBestVideos(best_patchsize, best_fasttresh)
                 self.track_error = 0
                 self.keypoints = []
                 self.descriptor = []
                 self.matches = []
                 self.matches_good = []
                 plt.close('all')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='''This script reads the dataset images or rosbag files and outputs the matches over time''')
@@ -311,10 +339,11 @@ if __name__ == "__main__":
     parser.add_argument('--equalize', help='Histogram equalization, True or False', default=False)
     parser.add_argument('--ds_fps', help='Downsample fps to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
-    args = parser.parse_args()
-    #args = parser.parse_args(["euroc", "--source", "/media/meltem/moo/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/data", "--ds_fps", "False"])
-    object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution)
-    print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution))
+    parser.add_argument('--save_video', help='Save video with statistics', default=False)
+    #args = parser.parse_args()
+    args = parser.parse_args(["euroc", "--source", "/media/meltem/moo/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/data", "--ds_fps", "False", "--save_video", "True"])
+    object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
+    print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()
 
     #scatterplot met effecten van verschillende orb settings maken.

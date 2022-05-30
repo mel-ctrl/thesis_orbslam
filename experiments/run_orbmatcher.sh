@@ -2,7 +2,7 @@
 
 currentPath=`pwd`
 scriptPath="${currentPath}/orb.py"
-datasetPath="/media/meltem/moo/Meltem/Thesis/Datasets"
+datasetPath="/home/meltem/imow_line/visionTeam/Meltem/Datasets/"
 rosarioPath="${datasetPath}/Rosario"
 flourishPath="${datasetPath}/Flourish"
 eurocPath="${datasetPath}/EuRoC"
