@@ -208,27 +208,30 @@ class ORB:
             img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         if self.equalize == True:
             img = self.equalizeHist(img)
-        if self.ds_resolution:
+        if self.ds_resolution == True:
             img = cv.resize(img, (self.target_width, self.target_height))
         self.images.append(img)
         self.blur.append(self.variance_of_laplacian(img))
 
     def plotEffectSettings(self, settings, mean, index, minimum):
         effect_plot= plt.figure(4)
-        effect_plot, axes = plt.subplots(nrows = 1, ncols = 2, sharex=True)
-        
+        effect_plot, axes = plt.subplots(nrows = 1, ncols = 2, sharex=True, figsize=(20,15))
+        effect_plot.suptitle(self.save_extension)
+
         axes[0].scatter(index, mean)
-        axes[0].set_xlabel('Setting')
+        axes[0].set_xlabel('Setting (Patch size, FAST threshold, n_features, scale_factor, n_levels)')
         axes[0].set_ylabel('Mean')
         axes[0].set_xticks(index)
-        axes[0].set_xticklabels(settings,rotation=90)
+        axes[0].set_xticklabels(settings,fontsize=2, rotation=90)
+
         axes[1].scatter(index, minimum)
-        axes[1].set_xlabel('Setting')
+        axes[1].set_xlabel('Setting (Patch size, FAST threshold, n_features, scale_factor, n_levels)')
         axes[1].set_ylabel('Minimum')
         axes[1].set_xticks(index)
-        axes[1].set_xticklabels(settings,rotation=90)
-
-        plt.tight_layout()
+        axes[1].set_xticklabels(settings,fontsize=2, rotation=90)
+        
+        #plt.tight_layout()
+        
         return effect_plot
     
     def removeNonBestVideos(self, patchsize, fasttresh):
@@ -258,7 +261,7 @@ class ORB:
             bag.close()
 
         else:
-            for filename in os.listdir(self.source):
+            for filename in sorted(os.listdir(self.source)):
                 img = cv.imread(os.path.join(self.source,filename))
                 if img is not None and len(img) != 0:
                     if self.ds_fps and (self.fps != self.target_fps):
@@ -267,7 +270,7 @@ class ORB:
                             self.addImages(img)
                     else:
                         self.addImages(img)
-                if len(self.images) == 50:
+                if len(self.images) == 3:
                     break
 
         print("Read all images")
@@ -277,6 +280,9 @@ class ORB:
 
         sizes = [6, 12, 24, 48]
         fasttresh = [5, 10, 20, 40]
+        n_features = [500, 1000, 2000]
+        scale_factor = [1.05, 1.1, 1.15, 1.2]
+        n_levels = [4, 8, 12]
         best_std = 0
         best_mean = 0
         best_median = 0
@@ -292,44 +298,52 @@ class ORB:
         effect_plot_match_min = []
         for i in range(len(sizes)):
             for j in range(len(fasttresh)):
-                if self.save_video:
-                    fourcc = cv.VideoWriter_fourcc(*'MJPG')
-                    out = cv.VideoWriter((self.stats_folder + "videos/" + self.save_extension + "/" + str(sizes[i]) + "_" + str(fasttresh[j]) + ".avi"), fourcc, self.target_fps, (img.shape[1]*2, img.shape[0]))
-                index+=1
-                print("Matching features for patch size {size} and fast treshold {tresh}".format(size=sizes[i], tresh=fasttresh[j]))
-                orb = cv.ORB_create(nfeatures=2000, scaleFactor=1.2, nlevels=8, edgeThreshold=sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[i], fastThreshold=fasttresh[j])
-                self.findKeyPoints(orb)
-                self.matchKeyPointsBF() 
-                self.filterMatches(plot=False, out=out)
+                for k in range(len(n_features)):
+                    for l in range(len(scale_factor)):
+                        for m in range(len(n_levels)):
+                            if self.save_video:
+                                fourcc = cv.VideoWriter_fourcc(*'MJPG')
+                                if self.ds_resolution == True:
+                                    out = cv.VideoWriter((self.stats_folder + "videos/" + self.save_extension + "/" + str(sizes[i]) + "_" + str(fasttresh[j]) + ".avi"), fourcc, self.target_fps, (self.target_width*2, self.target_height))
+                                else:
+                                    out = cv.VideoWriter((self.stats_folder + "videos/" + self.save_extension + "/" + str(sizes[i]) + "_" + str(fasttresh[j]) + ".avi"), fourcc, self.target_fps, (img.shape[1]*2, img.shape[0]))
+                                    
 
-                match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[i], fasttresh[j])
-                effect_plot_index.append(index)
-                effect_plot_settings.append((sizes[i], fasttresh[j]))
-                effect_plot_match_mean.append(match_mean)
-                effect_plot_match_min.append(match_min)
-                if best_min < match_min:
-                    best_std = match_std
-                    best_mean = match_mean
-                    best_median = match_median
-                    best_spread = match_spread
-                    best_min = match_min
-                    best_patchsize = sizes[i]
-                    best_fasttresh = fasttresh[j]
-                    best_plt = stats_plot
+                            index+=1
+                            print("Matching features for patch size {size} and fast treshold {tresh}".format(size=sizes[i], tresh=fasttresh[j]))
+                            orb = cv.ORB_create(nfeatures=n_features[k], scaleFactor=scale_factor[l], nlevels=n_levels[m], edgeThreshold=sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[i], fastThreshold=fasttresh[j])
+                            self.findKeyPoints(orb)
+                            self.matchKeyPointsBF() 
+                            self.filterMatches(plot=False, out=out)
+
+                            match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[i], fasttresh[j])
+                            effect_plot_index.append(index)
+                            effect_plot_settings.append((sizes[i], fasttresh[j], n_features[k], scale_factor[l], n_levels[m]))
+                            effect_plot_match_mean.append(match_mean)
+                            effect_plot_match_min.append(match_min)
+                            if best_min < match_min:
+                                best_std = match_std
+                                best_mean = match_mean
+                                best_median = match_median
+                                best_spread = match_spread
+                                best_min = match_min
+                                best_patchsize = sizes[i]
+                                best_fasttresh = fasttresh[j]
+                                best_plt = stats_plot
 
 
-                if i == (len(sizes)-1) and j == (len(fasttresh)-1):
-                    best_plt.savefig(self.stats_folder + self.save_extension + ".png")
-                    self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
-                    settings_plot = self.plotEffectSettings(effect_plot_settings, effect_plot_match_mean, effect_plot_index, effect_plot_match_min)
-                    settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
-                    self.removeNonBestVideos(best_patchsize, best_fasttresh)
-                self.track_error = 0
-                self.keypoints = []
-                self.descriptor = []
-                self.matches = []
-                self.matches_good = []
-                plt.close('all')
+                            if i == (len(sizes)-1) and m == (len(n_levels)-1):
+                                best_plt.savefig(self.stats_folder + self.save_extension + ".png")
+                                self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
+                                settings_plot = self.plotEffectSettings(effect_plot_settings, effect_plot_match_mean, effect_plot_index, effect_plot_match_min)
+                                settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
+                                self.removeNonBestVideos(best_patchsize, best_fasttresh)
+                            self.track_error = 0
+                            self.keypoints = []
+                            self.descriptor = []
+                            self.matches = []
+                            self.matches_good = []
+                            plt.close('all')
 
 
 if __name__ == "__main__":
@@ -341,11 +355,10 @@ if __name__ == "__main__":
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--save_video', help='Save video with statistics', default=False)
     #args = parser.parse_args()
-    args = parser.parse_args(["euroc", "--source", "/media/meltem/moo/Meltem/Thesis/Datasets/EuRoC/MH01/mav0/cam0/data", "--ds_fps", "False", "--save_video", "True"])
+    args = parser.parse_args(["kitti", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/kitti/data_odometry_color/dataset/sequences/00/image_2", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()
-
     #scatterplot met effecten van verschillende orb settings maken.
     # plots maken met behaviour vana mount of tracking failures in ORB-SLAM vs statistics van de dataset om te kijken welke een indicatie is van
     # tracking failure (mean, min, spread?)
