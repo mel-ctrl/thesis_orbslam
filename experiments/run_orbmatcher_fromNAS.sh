@@ -1,14 +1,14 @@
 #!/bin/bash
 
 currentPath=`pwd`
-scriptPath="${currentPath}/orb.py"
+scriptPath="${currentPath}/settings_test.py"
 datasetPath="/home/deep/imow_line/visionTeam/Meltem"
 rosarioPath="${datasetPath}/Rosario"
 flourishPath="${datasetPath}/Flourish"
 eurocPath="${datasetPath}/EuRoC"
 seasonsPath="${datasetPath}/4seasons"
 kittiPath="${datasetPath}/kitti"
-ownPath="${datasetPath}/own"
+ownPath="${datasetPath}/Own"
 #otherArgs="--ds_fps True"
 otherArgs=""
 python $scriptPath rosario --source "${rosarioPath}/sequence01.bag" $otherArgs
@@ -20,11 +20,18 @@ python $scriptPath rosario --source "${rosarioPath}/sequence06.bag" $otherArgs
 
 python $scriptPath flourish --source "${flourishPath}/DatasetA.bag" $otherArgs
 python $scriptPath flourish --source "${flourishPath}/DatasetB.bag" $otherArgs
-: '
-python $scriptPath own --source "${ownPath}/concrete.bag" $otherArgs
-python $scriptPath own --source "${ownPath}/farm.bag" $otherArgs
-python $scriptPath own --source "${ownPath}/grass.bag" $otherArgs
-'
+
+python $scriptPath own --source "${ownPath}/mc0006_20220523_123903_barn_rainy_corrected.bag" $otherArgs
+python $scriptPath own --source "${ownPath}/mc0006_20220523_123903_grass_rainy_corrected.bag" $otherArgs
+python $scriptPath own --source "${ownPath}/mc0006_20220523_123903_road_rainy_corrected.bag" $otherArgs
+
+python $scriptPath own --source "${ownPath}/mc0006_20220523_232418_barn_dark_corrected.bag" $otherArgs
+python $scriptPath own --source "${ownPath}/mc0006_20220523_232418_grass_dark_corrected.bag" $otherArgs
+python $scriptPath own --source "${ownPath}/mc0006_20220523_232418_road_dark_corrected.bag" $otherArgs
+
+python $scriptPath own --source "${ownPath}/mc0006_20220523_232418_grass_normal_corrected.bag" $otherArgs
+python $scriptPath own --source "${ownPath}/mc0006_20220523_232418_road_normal_corrected.bag" $otherArgs
+
 
 python $scriptPath kitti --source "${kittiPath}/data_odometry_color/dataset/sequences/00/image_2" $otherArgs
 python $scriptPath kitti --source "${kittiPath}/data_odometry_color/dataset/sequences/01/image_2" $otherArgs

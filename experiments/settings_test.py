@@ -37,10 +37,15 @@ class ORB:
 
         self.sizes = [6, 12, 24, 48]
         self.fasttresh = [5, 10, 20, 40]
-        self.n_features = [200, 500, 1000, 2000]
-        self.scale_factor = [1.05, 1.1, 1.15, 1.2]
+        self.n_features = [500, 1000, 2000, 3000]
+        self.scale_factor = [1.1, 1.2, 1.3, 1.4]
         self.n_levels = [4, 8, 12, 16]
 
+        self.n_features_effect = []
+        self.scale_factor_effect = []
+        self.n_levels_effect = []
+        self.patch_size_effect = []
+        self.fasttresh_effect = []
                 
         if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-1:][0]).split('.')[0]
@@ -138,67 +143,70 @@ class ORB:
         self.matches = []
         self.matches_good = []
 
+
+
     def plotEffectSettings(self):
         effect_plot= plt.figure(1)
         effect_plot, axes = plt.subplots(nrows = 5, ncols = 2, figsize=(8,6))
         effect_plot.suptitle(self.save_extension)
-
+        
         for i in range(len(self.n_features)):
-            axes[0][0].scatter(i, self.effectSettings[0][0])
-            axes[0][1].scatter(i, self.effectSettings[0][1])
-            axes[1][0].scatter(i, self.effectSettings[1][0])
-            axes[1][1].scatter(i, self.effectSettings[1][1])
-            axes[2][0].scatter(i, self.effectSettings[2][0])
-            axes[2][1].scatter(i, self.effectSettings[2][1])
-            axes[3][0].scatter(i, self.effectSettings[3][0])
-            axes[3][1].scatter(i, self.effectSettings[3][1])
-            axes[4][0].scatter(i, self.effectSettings[4][0])
-            axes[4][1].scatter(i, self.effectSettings[4][1])
+            axes[0][0].scatter(self.n_features[i], self.n_features_effect[i][0])
+            axes[0][1].scatter(self.n_features[i], self.n_features_effect[i][1])
+            axes[1][0].scatter(self.scale_factor[i], self.scale_factor_effect[i][0])
+            axes[1][1].scatter(self.scale_factor[i], self.scale_factor_effect[i][1])
+            axes[2][0].scatter(self.n_levels[i], self.n_levels_effect[i][0])
+            axes[2][1].scatter(self.n_levels[i], self.n_levels_effect[i][1])
+            axes[3][0].scatter(self.sizes[i], self.patch_size_effect[i][0])
+            axes[3][1].scatter(self.sizes[i], self.patch_size_effect[i][1])
+            axes[4][0].scatter(self.fasttresh[i], self.fasttresh_effect[i][0])
+            axes[4][1].scatter(self.fasttresh[i], self.fasttresh_effect[i][1])
 
         
         axes[0][0].set_xlabel('n_features parameter')
         axes[0][0].set_ylabel('Mean')
-        axes[0][1].set_xticklabels(self.n_features)
+        axes[0][0].set_xticks(self.n_features)
 
         axes[0][1].set_xlabel('n_features parameter')
         axes[0][1].set_ylabel('Minimum')
-        axes[0][1].set_xticklabels(self.n_features)
+        axes[0][1].set_xticks(self.n_features)
 
 
         axes[1][0].set_xlabel('scale_factor parameter')
         axes[1][0].set_ylabel('Mean')
         axes[1][0].set_xticklabels(self.scale_factor)
+        axes[1][0].set_xticks(self.scale_factor)
 
         axes[1][1].set_xlabel('scale factor parameter')
         axes[1][1].set_ylabel('Minimum')
-        axes[1][1].set_xticklabels(self.scale_factor)
+        axes[1][1].set_xticks(self.scale_factor)
 
 
         axes[2][0].set_xlabel('n_levels parameter')
         axes[2][0].set_ylabel('Mean')
-        axes[2][0].set_xticklabels(self.n_levels)
+        axes[2][0].set_xticks(self.n_levels)
 
         axes[2][1].set_xlabel('n_levels parameter')
         axes[2][1].set_ylabel('Minimum')
-        axes[2][1].set_xticklabels(self.n_levels)
+        axes[2][1].set_xticks(self.n_levels)
 
         
         axes[3][0].set_xlabel('patch size parameter')
         axes[3][0].set_ylabel('Mean')
-        axes[3][0].set_xticklabels(self.sizes)
+        axes[3][0].set_xticks(self.sizes)
 
         axes[3][1].set_xlabel('patch size parameter')
         axes[3][1].set_ylabel('Minimum')
-        axes[3][1].set_xticklabels(self.sizes)
+        axes[3][1].set_xticks(self.sizes)
 
 
         axes[4][0].set_xlabel('FAST treshold parameter')
         axes[4][0].set_ylabel('Mean')
-        axes[4][0].set_xticklabels(self.fasttresh)
+        axes[4][0].set_xticks(self.fasttresh)
 
         axes[4][1].set_xlabel('FAST treshold parameter')
         axes[4][1].set_ylabel('Minimum')
-        axes[4][1].set_xticklabels(self.fasttresh)
+        axes[4][1].set_xticks(self.fasttresh)
         
         plt.tight_layout()
 
@@ -238,36 +246,39 @@ class ORB:
 
 
         for i in range(len(self.n_features)):
-            orb = cv.ORB_create(nfeatures=self.n_features[i], scaleFactor=self.scale_factor[0], nlevels=self.n_levels[0], edgeThreshold=self.sizes[0], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=self.sizes[0], fastThreshold=self.fasttresh[0])
+            orb = cv.ORB_create(nfeatures=self.n_features[i])
             self.doMatching(orb)
             mean, min = self.calcStats()
-            self.effectSettings.append([mean,min])
+            self.n_features_effect.append([mean,min])
             self.clearResults()
 
             
         for i in range(len(self.scale_factor)):
-            orb = cv.ORB_create(nfeatures=self.n_features[0], scaleFactor=self.scale_factor[i], nlevels=self.n_levels[0], edgeThreshold=self.sizes[0], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=self.sizes[0], fastThreshold=self.fasttresh[0])
-            self.doMatching(orb)
-
-        for i in range(len(self.n_levels)):
-            orb = cv.ORB_create(nfeatures=self.n_features[0], scaleFactor=self.scale_factor[0], nlevels=self.n_levels[i], edgeThreshold=self.sizes[0], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=self.sizes[0], fastThreshold=self.fasttresh[0])
+            orb = cv.ORB_create(scaleFactor=self.scale_factor[i])
             self.doMatching(orb)
             mean, min = self.calcStats()
-            self.effectSettings.append([mean,min])
+            self.scale_factor_effect.append([mean,min])
+            self.clearResults()
+
+        for i in range(len(self.n_levels)):
+            orb = cv.ORB_create(nlevels=self.n_levels[i])
+            self.doMatching(orb)
+            mean, min = self.calcStats()
+            self.n_levels_effect.append([mean,min])
             self.clearResults()
 
         for i in range(len(self.sizes)):
-            orb = cv.ORB_create(nfeatures=self.n_features[0], scaleFactor=self.scale_factor[0], nlevels=self.n_levels[0], edgeThreshold=self.sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=self.sizes[i], fastThreshold=self.fasttresh[0])
+            orb = cv.ORB_create(edgeThreshold=self.sizes[i], patchSize=self.sizes[i])
             self.doMatching(orb)
             mean, min = self.calcStats()
-            self.effectSettings.append([mean,min])
+            self.patch_size_effect.append([mean,min])
             self.clearResults()
 
         for i in range(len(self.fasttresh)):
-            orb = cv.ORB_create(nfeatures=self.n_features[0], scaleFactor=self.scale_factor[0], nlevels=self.n_levels[0], edgeThreshold=self.sizes[0], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=self.sizes[0], fastThreshold=self.fasttresh[i])
+            orb = cv.ORB_create(fastThreshold=self.fasttresh[i])
             self.doMatching(orb)
             mean, min = self.calcStats()
-            self.effectSettings.append([mean,min])
+            self.fasttresh_effect.append([mean,min])
             self.clearResults()
 
         settings_plot = self.plotEffectSettings()
@@ -283,8 +294,8 @@ if __name__ == "__main__":
     parser.add_argument('--ds_fps', help='Downsample fps to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--save_video', help='Save video with statistics', default=False)
-    #args = parser.parse_args()
-    args = parser.parse_args(["kitti", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/kitti/data_odometry_color/dataset/sequences/00/image_2", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
+    args = parser.parse_args()
+    #args = parser.parse_args(["kitti", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/kitti/data_odometry_color/dataset/sequences/00/image_2", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()
