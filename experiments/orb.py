@@ -10,6 +10,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import argparse
 import pathlib
+import csv
 
 class ORB:
     def __init__(self, dataset, source, equalize, ds_fps, ds_resolution, save_video):
@@ -28,6 +29,7 @@ class ORB:
         self.save_hist_folder = self.histo_folder + self.dataset
         self.blur = []
         self.flow = []
+        self.frame_stats = []
         self.target_fps = 10
         self.target_width, self.target_height = 672, 376
         self.ds_fps = bool(ds_fps)
@@ -59,10 +61,20 @@ class ORB:
             self.fps = 10
 
         video_dir = self.stats_folder + "videos/" + self.save_extension
+        self.frame_stats_file = self.stats_folder + self.save_extension + "_stats.csv"
         if not os.path.exists(self.save_stats_folder):
             os.makedirs(self.save_stats_folder)
         if not os.path.exists(video_dir):
             os.makedirs(video_dir)
+        if os.path.exists(self.frame_stats_file):
+            os.remove(self.frame_stats_file)
+        if not os.path.exists(self.frame_stats_file):
+            header = ['patchsize', 'fasttresh', 'track_error', 'total_matches', 'good_matches', 'blur', 'flow']
+            with open(self.frame_stats_file, 'w') as statsfile:
+                writer = csv.writer(statsfile)
+                writer.writerow(header)
+            statsfile.close()
+
 
     def findKeyPoints(self, orb):
         for img in self.images:
@@ -85,7 +97,7 @@ class ORB:
                 self.matches.append(matches)
             except:
                 continue
-
+        
     def matchKeyPointsFLANN(self):
         FLANN_INDEX_LSH = 6
         index_params= dict(algorithm = FLANN_INDEX_LSH,
@@ -103,20 +115,21 @@ class ORB:
             self.matches.append(matches)
 
 
-    def filterMatches(self, plot, out):
+    def filterMatches(self, plot, out, patchsize, fasttresh):
         for image in range(len(self.images)-1):
             matches_good = []
             matchesMask = [[0,0] for i in range(len(self.matches[image]))]
             # ratio test as per Lowe's paper
             for i,(m,n) in enumerate(self.matches[image]):
-                if m.distance < 0.8*n.distance:
+                if m.distance < 0.75*n.distance:
                     matchesMask[i]=[1,0]
                     matches_good.append(m)
             self.matches_good.append(matches_good)
+            self.trackFrameStats(patchsize, fasttresh)
 
             if plot or self.save_video:
                 draw_params = dict(matchColor = (0,255,0),
-                        singlePointColor = (255,0,0),
+                        singlePointColor = (0,0,255),
                         matchesMask = matchesMask,
                         flags = cv.DrawMatchesFlags_DEFAULT)
                 img = cv.drawMatchesKnn(self.images[image],self.keypoints[image],self.images[image+1],self.keypoints[image+1],self.matches[image],None,**draw_params)
@@ -125,6 +138,20 @@ class ORB:
                     plt.imshow(img)
                     plt.show()
                 if self.save_video:
+                    patchsize = self.frame_stats[-1][0]
+                    fasttresh = self.frame_stats[-1][1]
+                    track_error = self.frame_stats[-1][2]
+                    total_matches = self.frame_stats[-1][3]
+                    good_matches = self.frame_stats[-1][4]
+                    blur = self.frame_stats[-1][5]
+                    flow = self.frame_stats[-1][6]
+                    cv.rectangle(img,(0, int(4*img.shape[0]/5)),(int(img.shape[1]/5),int(img.shape[0])),(0,0,0),-1)
+                    font = cv.FONT_HERSHEY_SIMPLEX 
+                    cv.putText(img, "patchsize: {patchsize}, fasttresh: {fasttresh}".format(patchsize = str(patchsize), fasttresh = str(fasttresh)),(0 , int(4*img.shape[0]/5+10)), font, 0.4,(255,255,255),1,cv.LINE_AA)
+                    cv.putText(img, "track error: {track_error}".format(track_error = str(track_error)),(0 , int(4*img.shape[0]/5+30)), font, 0.4,(255,255,255),1,cv.LINE_AA)
+                    cv.putText(img, "total matches: {total_matches} good matches: {good_matches}".format(total_matches=str(total_matches), good_matches=str(good_matches)),(0 , int(4*img.shape[0]/5+50)), font, 0.4,(255,255,255),1,cv.LINE_AA)
+                    cv.putText(img, "blur: {blur} flow: {flow}".format(blur=str(round(blur)), flow=str(round(flow))),(0 , int(4*img.shape[0]/5+70)), font, 0.4,(255,255,255),1,cv.LINE_AA)
+
                     out.write(img)
 
 
@@ -172,6 +199,8 @@ class ORB:
         with open(self.statsfile, "a") as file:
             yaml.dump(data, file)
 
+
+
     def plotStats(self, patchsize, fasttresh):
         stats_plot = plt.figure(1)
         y = []
@@ -215,20 +244,22 @@ class ORB:
 
     def plotEffectSettings(self, settings, mean, index, minimum):
         effect_plot= plt.figure(4)
-        effect_plot, axes = plt.subplots(nrows = 1, ncols = 2, sharex=True, figsize=(20,15))
+        effect_plot, axes = plt.subplots(nrows = 3, ncols = 2, sharex=True, figsize=(8,6))
         effect_plot.suptitle(self.save_extension)
+        #idx = [i*50 for i in index]
+        idx = index
 
-        axes[0].scatter(index, mean)
+        axes[0].scatter(mean, idx)
         axes[0].set_xlabel('Setting (Patch size, FAST threshold, n_features, scale_factor, n_levels)')
         axes[0].set_ylabel('Mean')
-        axes[0].set_xticks(index)
-        axes[0].set_xticklabels(settings,fontsize=2, rotation=90)
+        axes[0].set_yticks(idx)
+        axes[0].set_yticklabels(settings)
 
-        axes[1].scatter(index, minimum)
+        axes[1].scatter(minimum, idx)
         axes[1].set_xlabel('Setting (Patch size, FAST threshold, n_features, scale_factor, n_levels)')
         axes[1].set_ylabel('Minimum')
-        axes[1].set_xticks(index)
-        axes[1].set_xticklabels(settings,fontsize=2, rotation=90)
+        axes[1].set_yticks(idx)
+        axes[1].set_yticklabels(settings)
         
         #plt.tight_layout()
         
@@ -241,6 +272,21 @@ class ORB:
                 continue
             else:
                 os.remove(folder + "/" + file)
+
+    def trackFrameStats(self, patchsize, fasttresh):
+        data = [patchsize, fasttresh, self.track_error, len(self.matches), len(self.matches_good), self.blur[-1], self.flow[-1]]
+        self.frame_stats.append(data)
+
+    
+    def writeFrameStats(self, best_patchsize, best_treshold):
+        with open(self.frame_stats_file, 'a') as frame_statsfile:
+            writer = csv.writer(frame_statsfile)
+            for row in self.frame_stats:
+                if row[0] == str(best_patchsize) and row[1] == str(best_treshold):
+                    writer.writerow(row)
+        frame_statsfile.close()
+
+
 
 
     def main(self):
@@ -280,9 +326,9 @@ class ORB:
 
         sizes = [6, 12, 24, 48]
         fasttresh = [5, 10, 20, 40]
-        n_features = [500, 1000, 2000]
+        n_features = [200, 500, 1000, 2000]
         scale_factor = [1.05, 1.1, 1.15, 1.2]
-        n_levels = [4, 8, 12]
+        n_levels = [4, 8, 12, 16]
         best_std = 0
         best_mean = 0
         best_median = 0
@@ -314,7 +360,8 @@ class ORB:
                             orb = cv.ORB_create(nfeatures=n_features[k], scaleFactor=scale_factor[l], nlevels=n_levels[m], edgeThreshold=sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[i], fastThreshold=fasttresh[j])
                             self.findKeyPoints(orb)
                             self.matchKeyPointsBF() 
-                            self.filterMatches(plot=False, out=out)
+                            self.filterMatches(plot=False, out=out, patchsize=sizes[i], fasttresh=fasttresh[j])
+
 
                             match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[i], fasttresh[j])
                             effect_plot_index.append(index)
@@ -335,6 +382,7 @@ class ORB:
                             if i == (len(sizes)-1) and m == (len(n_levels)-1):
                                 best_plt.savefig(self.stats_folder + self.save_extension + ".png")
                                 self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
+                                self.writeFrameStats(best_patchsize, best_fasttresh)
                                 settings_plot = self.plotEffectSettings(effect_plot_settings, effect_plot_match_mean, effect_plot_index, effect_plot_match_min)
                                 settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
                                 self.removeNonBestVideos(best_patchsize, best_fasttresh)
