@@ -70,6 +70,9 @@ class ORB:
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-2:][0])
             self.fps = 10
 
+        if not os.path.exists(self.save_stats_folder):
+            os.makedirs(self.save_stats_folder)
+
 
     def findKeyPoints(self, orb):
         for img in self.images:
@@ -148,7 +151,7 @@ class ORB:
     def plotEffectSettings(self):
         effect_plot= plt.figure(1)
         effect_plot, axes = plt.subplots(nrows = 5, ncols = 2, figsize=(8,6))
-        effect_plot.suptitle(self.save_extension)
+        effect_plot.suptitle(self.save_extension, size=12)
         
         for i in range(len(self.n_features)):
             axes[0][0].scatter(self.n_features[i], self.n_features_effect[i][0])
@@ -294,8 +297,8 @@ if __name__ == "__main__":
     parser.add_argument('--ds_fps', help='Downsample fps to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--save_video', help='Save video with statistics', default=False)
-    args = parser.parse_args()
-    #args = parser.parse_args(["kitti", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/kitti/data_odometry_color/dataset/sequences/00/image_2", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
+    #args = parser.parse_args()
+    args = parser.parse_args(["kitti", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/kitti/data_odometry_color/dataset/sequences/00/image_2", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()

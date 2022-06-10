@@ -2,7 +2,7 @@
 
 currentPath=`pwd`
 scriptPath="${currentPath}/settings_test.py"
-datasetPath="/home/deep/imow_line/visionTeam/Meltem"
+datasetPath="/home/meltem/imow_line/visionTeam/Meltem/Datasets"
 rosarioPath="${datasetPath}/Rosario"
 flourishPath="${datasetPath}/Flourish"
 eurocPath="${datasetPath}/EuRoC"

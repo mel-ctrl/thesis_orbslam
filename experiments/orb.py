@@ -9,7 +9,6 @@ import rosbag
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import argparse
-import pathlib
 import csv
 
 class ORB:
@@ -209,8 +208,6 @@ class ORB:
             y.append(len(self.matches_good[i]))
         plt.plot(xint, y)
         plt.axhline(np.mean(y), linestyle='--')
-        
-        print(pathlib.Path(__file__).parent.resolve())
 
         std = round(np.std(y),1)
         mean = round(np.mean(y),1)
@@ -241,29 +238,6 @@ class ORB:
             img = cv.resize(img, (self.target_width, self.target_height))
         self.images.append(img)
         self.blur.append(self.variance_of_laplacian(img))
-
-    def plotEffectSettings(self, settings, mean, index, minimum):
-        effect_plot= plt.figure(4)
-        effect_plot, axes = plt.subplots(nrows = 3, ncols = 2, sharex=True, figsize=(8,6))
-        effect_plot.suptitle(self.save_extension)
-        #idx = [i*50 for i in index]
-        idx = index
-
-        axes[0].scatter(mean, idx)
-        axes[0].set_xlabel('Setting (Patch size, FAST threshold, n_features, scale_factor, n_levels)')
-        axes[0].set_ylabel('Mean')
-        axes[0].set_yticks(idx)
-        axes[0].set_yticklabels(settings)
-
-        axes[1].scatter(minimum, idx)
-        axes[1].set_xlabel('Setting (Patch size, FAST threshold, n_features, scale_factor, n_levels)')
-        axes[1].set_ylabel('Minimum')
-        axes[1].set_yticks(idx)
-        axes[1].set_yticklabels(settings)
-        
-        #plt.tight_layout()
-        
-        return effect_plot
     
     def removeNonBestVideos(self, patchsize, fasttresh):
         folder = self.stats_folder + "videos/" + self.save_extension
@@ -287,11 +261,9 @@ class ORB:
         frame_statsfile.close()
 
 
-
-
     def main(self):
         print("Dataset: {dataset}".format(dataset=self.save_extension))
-        i = 0
+        img_idx = 0
         if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
             bag = rosbag.Bag(self.source, "r")
             bridge = CvBridge()
@@ -299,8 +271,8 @@ class ORB:
                 img = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
                 if img is not None and len(img) != 0:
                     if self.ds_fps and (self.fps != self.target_fps):
-                        i +=1
-                        if i % (self.fps/(self.fps-self.target_fps)) != 0:
+                        img_idx +=1
+                        if img_idx % (self.fps/(self.fps-self.target_fps)) != 0:
                             self.addImages(img)
                     else:
                         self.addImages(img)
@@ -316,8 +288,6 @@ class ORB:
                             self.addImages(img)
                     else:
                         self.addImages(img)
-                if len(self.images) == 3:
-                    break
 
         print("Read all images")
 
@@ -326,9 +296,9 @@ class ORB:
 
         sizes = [6, 12, 24, 48]
         fasttresh = [5, 10, 20, 40]
-        n_features = [200, 500, 1000, 2000]
-        scale_factor = [1.05, 1.1, 1.15, 1.2]
+        scale_factor = [1.1, 1.2, 1.3, 1.4]
         n_levels = [4, 8, 12, 16]
+        n_features = 2000
         best_std = 0
         best_mean = 0
         best_median = 0
@@ -342,56 +312,49 @@ class ORB:
         effect_plot_settings = []
         effect_plot_match_mean = []
         effect_plot_match_min = []
-        for i in range(len(sizes)):
-            for j in range(len(fasttresh)):
-                for k in range(len(n_features)):
-                    for l in range(len(scale_factor)):
-                        for m in range(len(n_levels)):
-                            if self.save_video:
-                                fourcc = cv.VideoWriter_fourcc(*'MJPG')
-                                if self.ds_resolution == True:
-                                    out = cv.VideoWriter((self.stats_folder + "videos/" + self.save_extension + "/" + str(sizes[i]) + "_" + str(fasttresh[j]) + ".avi"), fourcc, self.target_fps, (self.target_width*2, self.target_height))
-                                else:
-                                    out = cv.VideoWriter((self.stats_folder + "videos/" + self.save_extension + "/" + str(sizes[i]) + "_" + str(fasttresh[j]) + ".avi"), fourcc, self.target_fps, (img.shape[1]*2, img.shape[0]))
-                                    
+        for size_idx in range(len(sizes)):
+            for fasttresh_idx in range(len(fasttresh)):
+                for scalefactor_idx in range(len(scale_factor)):
+                    for levels_idx in range(len(n_levels)):
+                        if self.save_video:
+                            fourcc = cv.VideoWriter_fourcc(*'MJPG')
+                            if self.ds_resolution == True:
+                                out = cv.VideoWriter((self.stats_folder + "videos/" + self.save_extension + "/" + str(sizes[size_idx]) + "_" + str(fasttresh[fasttresh_idx]) + ".avi"), fourcc, self.target_fps, (self.target_width*2, self.target_height))
+                            else:
+                                out = cv.VideoWriter((self.stats_folder + "videos/" + self.save_extension + "/" + str(sizes[size_idx]) + "_" + str(fasttresh[fasttresh_idx]) + ".avi"), fourcc, self.target_fps, (img.shape[1]*2, img.shape[0]))
+                                
 
-                            index+=1
-                            print("Matching features for patch size {size} and fast treshold {tresh}".format(size=sizes[i], tresh=fasttresh[j]))
-                            orb = cv.ORB_create(nfeatures=n_features[k], scaleFactor=scale_factor[l], nlevels=n_levels[m], edgeThreshold=sizes[i], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[i], fastThreshold=fasttresh[j])
-                            self.findKeyPoints(orb)
-                            self.matchKeyPointsBF() 
-                            self.filterMatches(plot=False, out=out, patchsize=sizes[i], fasttresh=fasttresh[j])
-
-
-                            match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[i], fasttresh[j])
-                            effect_plot_index.append(index)
-                            effect_plot_settings.append((sizes[i], fasttresh[j], n_features[k], scale_factor[l], n_levels[m]))
-                            effect_plot_match_mean.append(match_mean)
-                            effect_plot_match_min.append(match_min)
-                            if best_min < match_min:
-                                best_std = match_std
-                                best_mean = match_mean
-                                best_median = match_median
-                                best_spread = match_spread
-                                best_min = match_min
-                                best_patchsize = sizes[i]
-                                best_fasttresh = fasttresh[j]
-                                best_plt = stats_plot
+                        index+=1
+                        print("Matching features for patch size {size} and fast treshold {tresh}".format(size=sizes[size_idx], tresh=fasttresh[fasttresh_idx]))
+                        orb = cv.ORB_create(nfeatures=n_features, scaleFactor=scale_factor[scalefactor_idx], nlevels=n_levels[levels_idx], edgeThreshold=sizes[size_idx], firstLevel=0, WTA_K=2, scoreType=ORB_HARRIS_SCORE , patchSize=sizes[size_idx], fastThreshold=fasttresh[fasttresh_idx])
+                        self.findKeyPoints(orb)
+                        self.matchKeyPointsBF() 
+                        self.filterMatches(plot=False, out=out, patchsize=sizes[size_idx], fasttresh=fasttresh[fasttresh_idx])
 
 
-                            if i == (len(sizes)-1) and m == (len(n_levels)-1):
-                                best_plt.savefig(self.stats_folder + self.save_extension + ".png")
-                                self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
-                                self.writeFrameStats(best_patchsize, best_fasttresh)
-                                settings_plot = self.plotEffectSettings(effect_plot_settings, effect_plot_match_mean, effect_plot_index, effect_plot_match_min)
-                                settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
-                                self.removeNonBestVideos(best_patchsize, best_fasttresh)
-                            self.track_error = 0
-                            self.keypoints = []
-                            self.descriptor = []
-                            self.matches = []
-                            self.matches_good = []
-                            plt.close('all')
+                        match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[size_idx], fasttresh[fasttresh_idx])
+                        if best_min < match_min:
+                            best_std = match_std
+                            best_mean = match_mean
+                            best_median = match_median
+                            best_spread = match_spread
+                            best_min = match_min
+                            best_patchsize = sizes[size_idx]
+                            best_fasttresh = fasttresh[fasttresh_idx]
+                            best_plt = stats_plot
+
+
+                        if size_idx == (len(sizes)-1) and levels_idx == (len(n_levels)-1):
+                            best_plt.savefig(self.stats_folder + self.save_extension + ".png")
+                            self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
+                            self.writeFrameStats(best_patchsize, best_fasttresh)
+                            self.removeNonBestVideos(best_patchsize, best_fasttresh)
+                        self.track_error = 0
+                        self.keypoints = []
+                        self.descriptor = []
+                        self.matches = []
+                        self.matches_good = []
+                        plt.close('all')
 
 
 if __name__ == "__main__":
