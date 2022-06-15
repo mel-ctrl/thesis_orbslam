@@ -56,7 +56,7 @@ class ORB:
                 self.image_topic = "/stereo/left/image_raw"
                 self.fps = 15
             elif self.dataset == "own":
-                self.image_topic = "/daheng_camera_manager/left/image_raw"
+                self.image_topic = "/daheng_camera_manager/left/image_rect"
                 self.fps = 10
         elif self.dataset == "euroc":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-4:][0])
@@ -93,19 +93,31 @@ class ORB:
             try:
                 matches = bf.knnMatch(self.descriptor[i], self.descriptor[i+1], k=2)
                 self.matches.append(matches)
+                print(len(matches))
             except:
                 continue
 
     def filterMatches(self):
-        for image in range(len(self.images)-1):
+        for image in range(len(self.matches)):
             matches_good = []
-            matchesMask = [[0,0] for i in range(len(self.matches[image]))]
             # ratio test as per Lowe's paper
-            for i,(m,n) in enumerate(self.matches[image]):
-                if m.distance < 0.75*n.distance:
-                    matchesMask[i]=[1,0]
-                    matches_good.append(m)
-            self.matches_good.append(matches_good)
+            '''
+            try:
+                for i,(m,n) in enumerate(self.matches[image]):
+                    if m.distance < 0.75*n.distance:
+                        matches_good.append(m)
+                self.matches_good.append(matches_good)
+            except ValueError:
+                pass
+            '''
+            try:
+                for i, descriptor in enumerate(self.matches[image]):
+                    if len(descriptor) == 2:
+                        if descriptor[0].distance < 0.75*descriptor[1].distance:
+                            matches_good.append(descriptor[0])
+                    self.matches_good.append(matches_good)
+            except ValueError:
+                pass
 
         if len(self.matches_good) < 20:
             self.track_error += 1
@@ -131,10 +143,10 @@ class ORB:
         for i in xint:
             y.append(len(self.matches_good[i]))
 
-        std = round(np.std(y),1)
+        #std = round(np.std(y),1)
         mean = round(np.mean(y),1)
-        median = np.median(y)
-        spread = np.max(y)-np.min(y)
+        #median = np.median(y)
+        #spread = np.max(y)-np.min(y)
         min = np.min(y)
 
         return mean, min
@@ -150,8 +162,8 @@ class ORB:
 
     def plotEffectSettings(self):
         effect_plot= plt.figure(1)
-        effect_plot, axes = plt.subplots(nrows = 5, ncols = 2, figsize=(8,6))
-        effect_plot.suptitle(self.save_extension, size=12)
+        effect_plot, axes = plt.subplots(nrows = 5, ncols = 2, figsize=(10,8))
+        effect_plot.suptitle(self.save_extension, size=8, y=1)
         
         for i in range(len(self.n_features)):
             axes[0][0].scatter(self.n_features[i], self.n_features_effect[i][0])
@@ -242,8 +254,6 @@ class ORB:
                             self.addImages(img)
                     else:
                         self.addImages(img)
-                if len(self.images) == 3:
-                    break
 
         print("Read all images")
 
@@ -298,7 +308,7 @@ if __name__ == "__main__":
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--save_video', help='Save video with statistics', default=False)
     #args = parser.parse_args()
-    args = parser.parse_args(["kitti", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/kitti/data_odometry_color/dataset/sequences/00/image_2", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
+    args = parser.parse_args(["seasons", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/4seasons/highway/loop1/distorted_images/cam0", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()

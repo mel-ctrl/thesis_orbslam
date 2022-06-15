@@ -1958,7 +1958,9 @@ void Tracking::Track()
                     Verbose::PrintMess("TRACK: Track with motion model", Verbose::VERBOSITY_DEBUG);
                     bOK = TrackWithMotionModel();
                     if(!bOK)
+                        Verbose::PrintMess("TRACK: Motion failed, track with respect to the reference KF ", Verbose::VERBOSITY_DEBUG);
                         bOK = TrackReferenceKeyFrame();
+                        
                 }
 
 
@@ -2735,6 +2737,7 @@ bool Tracking::TrackReferenceKeyFrame()
     vector<MapPoint*> vpMapPointMatches;
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
+    std::cout << nmatches << std::endl;
 
     if(nmatches<15)
     {
@@ -2778,6 +2781,7 @@ bool Tracking::TrackReferenceKeyFrame()
                 nmatchesMap++;
         }
     }
+    std::cout << nmatchesMap << std::endl;
 
     if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
         return true;
@@ -2974,6 +2978,7 @@ bool Tracking::TrackLocalMap()
         }
 
     int inliers;
+    
     if (!mpAtlas->isImuInitialized())
         Optimizer::PoseOptimization(&mCurrentFrame);
     else
@@ -2998,7 +3003,7 @@ bool Tracking::TrackLocalMap()
             }
         }
     }
-
+    std::cout << inliers << std::endl;
     aux1 = 0, aux2 = 0;
     for(int i=0; i<mCurrentFrame.N; i++)
         if( mCurrentFrame.mvpMapPoints[i])
@@ -3033,6 +3038,9 @@ bool Tracking::TrackLocalMap()
         }
     }
 
+    std::cout << mnMatches << std::endl;
+    std::cout << mnMatchesInliers << std::endl;
+
     #ifdef RECORD_MATCHING_STATS
     ofstream statsfile;
     statsfile.open("/home/meltem/thesis_orbslam/matchingSTATS.txt", fstream::app);
@@ -3044,7 +3052,7 @@ bool Tracking::TrackLocalMap()
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
     mpLocalMapper->mnMatchesInliers=mnMatchesInliers;
-    if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50)
+    if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50) //50
         return false;
 
     if((mnMatchesInliers>10)&&(mState==RECENTLY_LOST))
@@ -3080,8 +3088,6 @@ bool Tracking::TrackLocalMap()
 
 bool Tracking::NeedNewKeyFrame()
 {
-
-
     if((mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD) && !mpAtlas->GetCurrentMap()->isImuInitialized())
     {
         if (mSensor == System::IMU_MONOCULAR && (mCurrentFrame.mTimeStamp-mpLastKeyFrame->mTimeStamp)>=0.25)
@@ -3097,10 +3103,11 @@ bool Tracking::NeedNewKeyFrame()
 
     // If Local Mapping is freezed by a Loop Closure do not insert keyframes
     if(mpLocalMapper->isStopped() || mpLocalMapper->stopRequested()) {
-        /*if(mSensor == System::MONOCULAR)
-        {
-            std::cout << "NeedNewKeyFrame: localmap stopped" << std::endl;
-        }*/
+        //if(mSensor == System::MONOCULAR)
+        //{
+        //   std::cout << "NeedNewKeyFrame: localmap stopped" << std::endl;
+        //}
+
         return false;
     }
 
@@ -3150,13 +3157,13 @@ bool Tracking::NeedNewKeyFrame()
     if(nKFs<2)
         thRefRatio = 0.4f;
 
-    /*int nClosedPoints = nTrackedClose + nNonTrackedClose;
-    const int thStereoClosedPoints = 15;
-    if(nClosedPoints < thStereoClosedPoints && (mSensor==System::STEREO || mSensor==System::IMU_STEREO))
-    {
+    //int nClosedPoints = nTrackedClose + nNonTrackedClose;
+    //const int thStereoClosedPoints = 15;
+    //if(nClosedPoints < thStereoClosedPoints && (mSensor==System::STEREO || mSensor==System::IMU_STEREO))
+    //{
         //Pseudo-monocular, there are not enough close points to be confident about the stereo observations.
-        thRefRatio = 0.9f;
-    }*/
+    //    thRefRatio = 0.9f;
+    //}
 
     if(mSensor==System::MONOCULAR)
         thRefRatio = 0.9f;
@@ -3230,6 +3237,7 @@ bool Tracking::NeedNewKeyFrame()
     }
     else
         return false;
+
 }
 
 void Tracking::CreateNewKeyFrame()
@@ -3706,7 +3714,7 @@ bool Tracking::Relocalization()
 
             MLPnPsolver* pSolver = vpMLPnPsolvers[i];
             Eigen::Matrix4f eigTcw;
-            bool bTcw = pSolver->iterate(5,bNoMore,vbInliers,nInliers, eigTcw);
+            bool bTcw = pSolver->iterate(100,bNoMore,vbInliers,nInliers, eigTcw);
 
             // If Ransac reachs max. iterations discard keyframe
             if(bNoMore)

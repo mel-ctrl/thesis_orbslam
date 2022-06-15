@@ -992,7 +992,6 @@ int Optimizer::PoseOptimization(Frame *pFrame)
         }
     }
     }
-
     if(nInitialCorrespondences<3)
         return 0;
 
