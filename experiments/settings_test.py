@@ -11,7 +11,8 @@ from cv_bridge import CvBridge
 import argparse
 import pathlib
 import csv
-
+import matplotlib
+matplotlib.use('TkAgg')
 class ORB:
     def __init__(self, dataset, source, equalize, ds_fps, ds_resolution, save_video):
         self.source = source
@@ -93,7 +94,6 @@ class ORB:
             try:
                 matches = bf.knnMatch(self.descriptor[i], self.descriptor[i+1], k=2)
                 self.matches.append(matches)
-                print(len(matches))
             except:
                 continue
 
@@ -227,6 +227,47 @@ class ORB:
 
         return effect_plot
 
+
+    def writeStatsToFile(self):
+        n_features_mean = []
+        n_features_min = [] 
+
+        scale_factor_mean = []
+        scale_factor_min = []
+
+        n_levels_mean = []
+        n_levels_min = []
+
+        sizes_mean = []
+        sizes_min = []
+
+        fasttresh_mean = [] 
+        fasttresh_min = []
+
+        [n_features_mean.append(float(i[0])) for i in self.n_features_effect]
+        [n_features_min.append(int(i[1])) for i in self.n_features_effect]
+
+        [scale_factor_mean.append(float(i[0])) for i in self.scale_factor_effect]
+        [scale_factor_min.append(int(i[1])) for i in self.scale_factor_effect]
+
+        [n_levels_mean.append(float(i[0])) for i in self.n_levels_effect]
+        [n_levels_min.append(int(i[1])) for i in self.n_levels_effect]
+
+        [sizes_mean.append(float(i[0])) for i in self.patch_size_effect]
+        [sizes_min.append(int(i[1])) for i in self.patch_size_effect]
+        
+        [fasttresh_mean.append(float(i[0])) for i in self.fasttresh_effect]
+        [fasttresh_min.append(int(i[1])) for i in self.fasttresh_effect]
+
+        data_dict = {'n_features': self.n_features, 'n_features_mean': n_features_mean, 'n_features_min': n_features_min, 'scale_factor': self.scale_factor, 'scale_factor_mean': scale_factor_mean, 'scale_factor_min': scale_factor_min, \
+            'n_levels': self.n_levels, 'n_levels_mean': n_levels_mean, 'n_levels_min': n_levels_min, \
+                'sizes': self.sizes, 'sizes_mean': sizes_mean, 'sizes_min': sizes_min,
+                'fasttresh': self.fasttresh, 'fasttresh_mean': fasttresh_mean, 'fasttresh_min': fasttresh_min}
+        data = {self.save_extension : data_dict}
+        with open("/home/meltem/thesis_orbslam/experiments/settings_result.yaml", "a") as file:
+            yaml.dump(data, file, default_flow_style=False)
+
+
     def main(self):
         print("Dataset: {dataset}".format(dataset=self.save_extension))
         i = 0
@@ -254,7 +295,6 @@ class ORB:
                             self.addImages(img)
                     else:
                         self.addImages(img)
-
         print("Read all images")
 
 
@@ -294,8 +334,9 @@ class ORB:
             self.fasttresh_effect.append([mean,min])
             self.clearResults()
 
-        settings_plot = self.plotEffectSettings()
-        settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
+        #settings_plot = self.plotEffectSettings()
+        #settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
+        self.writeStatsToFile()
 
 
 
@@ -307,8 +348,8 @@ if __name__ == "__main__":
     parser.add_argument('--ds_fps', help='Downsample fps to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--save_video', help='Save video with statistics', default=False)
-    #args = parser.parse_args()
-    args = parser.parse_args(["seasons", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/4seasons/highway/loop1/distorted_images/cam0", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
+    args = parser.parse_args()
+    #args = parser.parse_args(["seasons", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/4seasons/highway/loop1/distorted_images/cam0", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()

@@ -348,6 +348,7 @@ if __name__=="__main__":
     second_xyz_notscaled = rot * second_xyz + trans
     second_xyz_notscaled_full = rot * second_xyz_full + transGT
     first_stamps = first_list.keys()
+
     #first_stamps.sort()
     first_stamps = sorted(first_stamps)
     first_xyz_full = numpy.matrix([[float(value) for value in first_list[b][0:3]] for b in first_stamps]).transpose()

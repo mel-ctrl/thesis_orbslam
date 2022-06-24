@@ -37,7 +37,7 @@
 namespace ORB_SLAM3
 {
 
-Verbose::eLevel Verbose::th = Verbose::VERBOSITY_DEBUG;
+Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
                const bool bUseViewer, const int initFr, const string &strSequence):
@@ -254,7 +254,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     }
 
     // Fix verbosity
-    Verbose::SetTh(Verbose::VERBOSITY_DEBUG);
+    Verbose::SetTh(Verbose::VERBOSITY_NORMAL);
 
 }
 

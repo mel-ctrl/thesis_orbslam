@@ -2737,7 +2737,6 @@ bool Tracking::TrackReferenceKeyFrame()
     vector<MapPoint*> vpMapPointMatches;
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
-    std::cout << nmatches << std::endl;
 
     if(nmatches<15)
     {
@@ -2781,8 +2780,6 @@ bool Tracking::TrackReferenceKeyFrame()
                 nmatchesMap++;
         }
     }
-    std::cout << nmatchesMap << std::endl;
-
     if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
         return true;
     else
@@ -3003,7 +3000,6 @@ bool Tracking::TrackLocalMap()
             }
         }
     }
-    std::cout << inliers << std::endl;
     aux1 = 0, aux2 = 0;
     for(int i=0; i<mCurrentFrame.N; i++)
         if( mCurrentFrame.mvpMapPoints[i])
@@ -3038,8 +3034,6 @@ bool Tracking::TrackLocalMap()
         }
     }
 
-    std::cout << mnMatches << std::endl;
-    std::cout << mnMatchesInliers << std::endl;
 
     #ifdef RECORD_MATCHING_STATS
     ofstream statsfile;

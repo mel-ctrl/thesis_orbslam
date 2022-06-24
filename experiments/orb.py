@@ -10,6 +10,8 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import argparse
 import csv
+import matplotlib
+matplotlib.use('TkAgg')
 
 class ORB:
     def __init__(self, dataset, source, equalize, ds_fps, ds_resolution, save_video):
@@ -46,7 +48,7 @@ class ORB:
                 self.image_topic = "/stereo/left/image_raw"
                 self.fps = 15
             elif self.dataset == "own":
-                self.image_topic = "/daheng_camera_manager/left/image_raw"
+                self.image_topic = "/daheng_camera_manager/left/image_rect"
                 self.fps = 10
         elif self.dataset == "euroc":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-4:][0])
@@ -69,7 +71,7 @@ class ORB:
         if os.path.exists(self.frame_stats_file):
             os.remove(self.frame_stats_file)
         if not os.path.exists(self.frame_stats_file):
-            header = ['patchsize', 'fasttresh', 'scalefactor', 'n_levels', 'track_error', 'total_matches', 'good_matches', 'blur', 'flow']
+            header = ['patchsize', 'fasttresh', 'scalefactor', 'n_levels', 'track_error', 'features', 'total_matches', 'good_matches', 'blur', 'flow']
             with open(self.frame_stats_file, 'w') as statsfile:
                 writer = csv.writer(statsfile)
                 writer.writerow(header)
@@ -116,16 +118,22 @@ class ORB:
 
 
     def filterMatches(self, plot, out, patchsize, fasttresh, scalefactor, n_levels):
-        for image in range(len(self.images)-1):
+        for image in range(len(self.matches)):
             matches_good = []
-            matchesMask = [[0,0] for i in range(len(self.matches[image]))]
-            # ratio test as per Lowe's paper
-            for i,(m,n) in enumerate(self.matches[image]):
-                if m.distance < 0.75*n.distance:
-                    matchesMask[i]=[1,0]
-                    matches_good.append(m)
+            matchesMask = None
+            if(self.matches[image]):
+                matchesMask = [[0,0] for i in range(len(self.matches[image]))]
+                for i, pair in enumerate(self.matches[image]):
+                    try:
+                        m,n = pair
+                        if m.distance < 0.75*n.distance:
+                            if 'matchesMask' in locals():
+                                matchesMask[i]=[1,0]
+                            matches_good.append(m)
+                    except(ValueError):
+                        pass
             self.matches_good.append(matches_good)
-            self.trackFrameStats(patchsize, fasttresh, scalefactor, n_levels, len(self.matches[image]), len(matches_good), self.blur[image], self.flow[image])
+            self.trackFrameStats(patchsize, fasttresh, scalefactor, n_levels, len(self.keypoints[image]), len(self.matches[image]), len(matches_good), self.blur[image], self.flow[image])
 
             if plot or self.save_video:
                 draw_params = dict(matchColor = (0,255,0),
@@ -192,9 +200,23 @@ class ORB:
         flow_median=np.median(self.flow)
         flow_maximum=np.max(self.flow)
         flow_spread = np.max(self.flow)-np.min(self.flow)
+
+        features = []
+        xint = range(0, len(self.keypoints))
+        for i in xint:
+            features.append(len(self.keypoints[i]))
+
+        features_std = round(np.std(features),1)
+        features_mean = round(np.mean(features),1)
+        features_median = np.median(features)
+        features_spread= np.max(features)-np.min(features)
+        features_min = np.min(features)
         
+
         data_dict = {'track_error': int(self.track_error), 'match_mean': float(match_mean), 'match_std': float(match_std), 'match_median': float(match_median), 'match_minimum': int(match_minimum), \
-            'match_spread': int(match_spread), 'patchsize': int(patchsize), 'fasttresh': int(fasttresh), 'blur_mean': float(blur_mean), 'blur_std': float(blur_std), 'blur_median': float(blur_median), 'blur_maximum': float(blur_maximum), 'blur_spread': float(blur_spread), 'flow_mean': float(flow_mean), 'flow_std': float(flow_std), 'flow_median': float(flow_median), 'flow_maximum': float(flow_maximum), 'flow_spread': float(flow_spread)}
+            'match_spread': int(match_spread), 'patchsize': int(patchsize), 'fasttresh': int(fasttresh), 'blur_mean': float(blur_mean), 'blur_std': float(blur_std), 'blur_median': float(blur_median), \
+                'blur_maximum': float(blur_maximum), 'blur_spread': float(blur_spread), 'flow_mean': float(flow_mean), 'flow_std': float(flow_std), 'flow_median': float(flow_median), 'flow_maximum': float(flow_maximum), 'flow_spread': float(flow_spread), \
+                 'features_mean': float(features_mean), 'features_std': float(features_std), 'features_median': float(features_median), 'features_minimum': int(features_min), 'features_spread': int(features_spread)}
         data = {self.save_extension : data_dict}
         with open(self.statsfile, "a") as file:
             yaml.dump(data, file)
@@ -248,8 +270,8 @@ class ORB:
             else:
                 os.remove(folder + "/" + file)
 
-    def trackFrameStats(self, patchsize, fasttresh, scalefactor, n_levels, matches, matches_good, blur, flow):
-        data = [patchsize, fasttresh, scalefactor, n_levels, self.track_error, matches, matches_good, blur, flow]
+    def trackFrameStats(self, patchsize, fasttresh, scalefactor, n_levels, features, matches, matches_good, blur, flow):
+        data = [patchsize, fasttresh, scalefactor, n_levels, self.track_error, features, matches, matches_good, blur, flow]
         self.frame_stats.append(data)
 
     
@@ -289,6 +311,8 @@ class ORB:
                             self.addImages(img)
                     else:
                         self.addImages(img)
+                if(len(self.images))==3:
+                    break
         print("Read all images")
 
         print('Calculating optical flow between all images')
