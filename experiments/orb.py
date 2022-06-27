@@ -223,7 +223,7 @@ class ORB:
 
 
 
-    def plotStats(self, patchsize, fasttresh):
+    def plotStats(self, patchsize, fasttresh, n_levels, scalefactor):
         stats_plot = plt.figure(1)
         y = []
         xint = range(0, len(self.matches_good))
@@ -237,9 +237,10 @@ class ORB:
         median = np.median(y)
         spread = np.max(y)-np.min(y)
         min = np.min(y)
-
-        plt.title("std: {std}, mean: {mean}, median: {median}, \n minimum: {min}, spread: {spread}, \n patchsize: {patchsize}. fasttresh: {fasttresh}".format(std=std, mean=mean, median=median, min=min, spread = spread, patchsize=patchsize, fasttresh=fasttresh))
-        
+        plt.xlabel("Frame")
+        plt.ylabel("Matches")
+        plt.title("std: {std}, mean: {mean}, median: {median}, \n minimum: {min}, spread: {spread}, \n patchsize: {patchsize}, fasttresh: {fasttresh}, nlevels: {nlevels}, scalefactor: {scalefactor}".format(std=std, mean=mean, median=median, min=min, spread = spread, patchsize=patchsize, fasttresh=fasttresh, nlevels=n_levels, scalefactor=scalefactor))
+        plt.tight_layout()
         return std, mean, median, spread, min, stats_plot
         
     def equalizeHist(self, img_gray):
@@ -311,8 +312,6 @@ class ORB:
                             self.addImages(img)
                     else:
                         self.addImages(img)
-                if(len(self.images))==3:
-                    break
         print("Read all images")
 
         print('Calculating optical flow between all images')
@@ -350,7 +349,7 @@ class ORB:
                         self.matchKeyPointsBF() 
                         self.filterMatches(plot=False, out=self.out, patchsize=sizes[size_idx], fasttresh=fasttresh[fasttresh_idx], scalefactor=scale_factor[scalefactor_idx], n_levels=n_levels[levels_idx])
 
-                        match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[size_idx], fasttresh[fasttresh_idx])
+                        match_std, match_mean, match_median, match_spread, match_min, stats_plot = self.plotStats(sizes[size_idx], fasttresh[fasttresh_idx], n_levels[levels_idx], scale_factor[scalefactor_idx])
                         if best_min < match_min:
                             best_std = match_std
                             best_mean = match_mean
