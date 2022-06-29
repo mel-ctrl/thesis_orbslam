@@ -259,6 +259,7 @@ class ORB:
         [fasttresh_mean.append(float(i[0])) for i in self.fasttresh_effect]
         [fasttresh_min.append(int(i[1])) for i in self.fasttresh_effect]
 
+        '''
         data_dict = {'n_features': self.n_features, 'n_features_mean': n_features_mean, 'n_features_min': n_features_min, 'scale_factor': self.scale_factor, 'scale_factor_mean': scale_factor_mean, 'scale_factor_min': scale_factor_min, \
             'n_levels': self.n_levels, 'n_levels_mean': n_levels_mean, 'n_levels_min': n_levels_min, \
                 'sizes': self.sizes, 'sizes_mean': sizes_mean, 'sizes_min': sizes_min,
@@ -266,6 +267,37 @@ class ORB:
         data = {self.save_extension : data_dict}
         with open("/home/meltem/thesis_orbslam/experiments/settings_result.yaml", "a") as file:
             yaml.dump(data, file, default_flow_style=False)
+        '''
+        
+        
+        with open(self.stats_folder + "settings_" + self.save_extension.split('/')[0] + ".csv", 'w') as statsfile:
+            writer = csv.writer(statsfile)
+            writer.writerow([self.save_extension])
+            header = ['parameter', 'setting', 'mean', 'min']
+            writer.writerow(header)
+            writer.writerow([])
+            for i in range(len(self.fasttresh)):
+                row = ["FAST Threshold", self.fasttresh[i], fasttresh_mean[i], fasttresh_min[i]]
+                writer.writerow(row)
+            writer.writerow([])
+            for i in range(len(self.n_features)):
+                row = ["Number of features", self.n_features[i], n_features_mean[i], n_features_min[i]]
+                writer.writerow(row)
+            writer.writerow([])
+            for i in range(len(self.n_levels)):
+                row = ["Number of levels", self.n_levels[i], n_levels_mean[i], n_levels_min[i]]
+                writer.writerow(row)
+            writer.writerow([])
+            for i in range(len(self.scale_factor)):
+                row = ["Scale factor", self.scale_factor[i], scale_factor_mean[i], scale_factor_min[i]]
+                writer.writerow(row)
+            writer.writerow([])
+            for i in range(len(self.sizes)):
+                row = ["Patch size", self.sizes[i], sizes_mean[i], sizes_min[i]]
+                writer.writerow(row)
+            writer.writerow([])
+            writer.writerow([])
+        statsfile.close()
 
 
     def main(self):
@@ -295,6 +327,8 @@ class ORB:
                             self.addImages(img)
                     else:
                         self.addImages(img)
+                if len(self.images)==3:
+                    break
         print("Read all images")
 
 
