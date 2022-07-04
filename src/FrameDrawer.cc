@@ -199,10 +199,10 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale)
     cv::Mat imWithInfo;
     DrawTextInfo(im,state, imWithInfo);
     if(state == 3 || state == 4){
-        SaveImg(imWithInfo, state);
+        //SaveImg(imWithInfo, state);
     }
 
-    SaveAllImgs(imWithInfo);
+    //SaveAllImgs(imWithInfo);
     return imWithInfo;
 }
 
@@ -330,7 +330,7 @@ cv::Mat FrameDrawer::DrawRightFrame(float imageScale)
 
     return imWithInfo;
 }
-
+/*
 void FrameDrawer::SaveImg(cv::Mat &im, int nState){
     string folder = "/home/meltem/thesis_orbslam/imgs_failed_tracking";
     filesystem::create_directories(folder);
@@ -346,8 +346,8 @@ void FrameDrawer::SaveImg(cv::Mat &im, int nState){
     trackfailfile.close();
     #endif
 }
-
-
+*/
+/*
 void FrameDrawer::SaveAllImgs(cv::Mat &im){
     string folder = "/home/meltem/thesis_orbslam/imgs_all";
     filesystem::create_directories(folder);
@@ -356,7 +356,7 @@ void FrameDrawer::SaveAllImgs(cv::Mat &im){
     std::string path = s.str();
     cv::imwrite(path, im);
 }
-
+*/
 
 
 void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)

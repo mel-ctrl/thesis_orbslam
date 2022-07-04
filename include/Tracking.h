@@ -217,7 +217,7 @@ protected:
     void UpdateLastFrame();
     bool TrackWithMotionModel();
     bool PredictStateIMU();
-
+    void SaveTrackImg(cv::Mat &im, string extension);
     bool Relocalization();
 
     void UpdateLocalMap();

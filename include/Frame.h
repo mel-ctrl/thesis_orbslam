@@ -198,6 +198,7 @@ public:
     // Frame timestamp.
     double mTimeStamp;
     int mSequence;
+    cv::Mat leftImg;
     
     // Calibration matrix and OpenCV distortion parameters.
     cv::Mat mK;

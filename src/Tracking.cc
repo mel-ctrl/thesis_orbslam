@@ -28,6 +28,7 @@
 #include "KannalaBrandt8.h"
 #include "MLPnPsolver.h"
 #include "GeometricTools.h"
+#include <filesystem>
 
 #include <iostream>
 
@@ -1504,6 +1505,7 @@ Sophus::SE3f Tracking::GrabImageStereo(const int sequence, const cv::Mat &imRect
     mCurrentFrame.mNameFile = filename;
     mCurrentFrame.mnDataset = mnNumDataset;
 
+    
 #ifdef REGISTER_TIMES
     vdORBExtract_ms.push_back(mCurrentFrame.mTimeORB_Ext);
     vdStereoMatch_ms.push_back(mCurrentFrame.mTimeStereoMatch);
@@ -2737,10 +2739,11 @@ bool Tracking::TrackReferenceKeyFrame()
     vector<MapPoint*> vpMapPointMatches;
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
-
     if(nmatches<15)
     {
         cout << "TRACK_REF_KF: Less than 15 matches!!\n";
+        SaveTrackImg(mCurrentFrame.leftImg,  ("current_nofilter_" + std::to_string(nmatches)));
+        SaveTrackImg(mLastFrame.leftImg, ("last_nofilter_" + std::to_string(nmatches)));
         return false;
     }
 
@@ -2782,8 +2785,14 @@ bool Tracking::TrackReferenceKeyFrame()
     }
     if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
         return true;
-    else
+    else{
+        if(!nmatchesMap>=10){
+            SaveTrackImg(mCurrentFrame.leftImg,  ("current_filter_" + std::to_string(nmatchesMap)));
+            SaveTrackImg(mLastFrame.leftImg, ("last_filter_" + std::to_string(nmatchesMap)));
+        }
         return nmatchesMap>=10;
+    }
+        
 }
 
 void Tracking::UpdateLastFrame()
@@ -2859,6 +2868,15 @@ void Tracking::UpdateLastFrame()
     }
 }
 
+void Tracking::SaveTrackImg(cv::Mat &im, string extension){
+    string folder = "/home/meltem/thesis_orbslam/imgs_failed_match/";
+    filesystem::create_directories(folder);
+    stringstream s;
+    s << folder << mCurrentFrame.mSequence << "_" << extension << ".jpg";
+    std::string path = s.str();
+    cv::imwrite(path, im);
+}
+
 bool Tracking::TrackWithMotionModel()
 {
     ORBmatcher matcher(0.9,true);
@@ -2877,9 +2895,6 @@ bool Tracking::TrackWithMotionModel()
     {
         mCurrentFrame.SetPose(mVelocity * mLastFrame.GetPose());
     }
-
-
-
 
     fill(mCurrentFrame.mvpMapPoints.begin(),mCurrentFrame.mvpMapPoints.end(),static_cast<MapPoint*>(NULL));
 
