@@ -65,7 +65,7 @@ orbSTATS.txt
 relocalization.txt
 tracking_failure.txt
 track_request.txt
-experiments/stats/
+experiments/stats
 experiments/matching_original_orbslam/
 imgs_failed_match_juno
 FrameTrajectory_KITTI_Format.txt
