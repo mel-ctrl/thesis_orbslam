@@ -65,8 +65,8 @@ orbSTATS.txt
 relocalization.txt
 tracking_failure.txt
 track_request.txt
-experiments/stats/videos
-experiments/matching_original_orbslam
+experiments/stats/videos/
+experiments/matching_original_orbslam/
 
 FrameTrajectory_KITTI_Format.txt
 FrameTrajectory_TUM_Format.txt
