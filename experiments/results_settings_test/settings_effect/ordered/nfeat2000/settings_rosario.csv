@@ -1,0 +1,144 @@
+rosario/sequence01
+parameter,setting,mean,min,max
+
+FAST Threshold,5,115.4,33,440
+FAST Threshold,10,115.4,33,440
+FAST Threshold,20,115.4,33,440
+FAST Threshold,40,113.4,32,424
+
+Number of levels,4,89.4,44,315
+Number of levels,8,98.4,50,328
+Number of levels,12,104.9,54,341
+Number of levels,16,110.0,57,352
+
+Scale factor,1.1,98.4,50,328
+Scale factor,1.2,97.5,44,345
+Scale factor,1.3,95.5,46,350
+Scale factor,1.4,92.3,47,357
+
+Patch size,6,97.5,44,345
+Patch size,12,93.1,36,393
+Patch size,24,110.9,40,432
+Patch size,48,111.2,19,440
+
+
+rosario/sequence02
+parameter,setting,mean,min,max
+
+FAST Threshold,5,124.6,45,402
+FAST Threshold,10,124.6,45,402
+FAST Threshold,20,124.6,45,402
+FAST Threshold,40,111.7,39,365
+
+Number of levels,4,77.5,44,278
+Number of levels,8,88.1,47,294
+Number of levels,12,95.2,48,296
+Number of levels,16,99.6,56,297
+
+Scale factor,1.1,88.1,47,294
+Scale factor,1.2,87.9,47,309
+Scale factor,1.3,85.0,46,321
+Scale factor,1.4,83.9,46,312
+
+Patch size,6,87.9,47,309
+Patch size,12,89.0,40,347
+Patch size,24,116.1,40,375
+Patch size,48,143.8,34,368
+
+
+rosario/sequence03
+parameter,setting,mean,min,max
+
+FAST Threshold,5,174.9,48,450
+FAST Threshold,10,174.9,48,450
+FAST Threshold,20,174.9,48,450
+FAST Threshold,40,164.3,48,439
+
+Number of levels,4,145.2,52,432
+Number of levels,8,165.1,64,442
+Number of levels,12,172.7,67,437
+Number of levels,16,163.4,66,407
+
+Scale factor,1.1,152.2,51,419
+Scale factor,1.2,165.1,64,442
+Scale factor,1.3,170.1,61,437
+Scale factor,1.4,158.2,60,415
+
+Patch size,6,118.0,59,370
+Patch size,12,130.6,56,415
+Patch size,24,165.1,64,442
+Patch size,48,197.8,55,439
+
+
+rosario/sequence04
+parameter,setting,mean,min,max
+
+FAST Threshold,5,156.0,63,410
+FAST Threshold,10,156.0,63,410
+FAST Threshold,20,156.0,64,410
+FAST Threshold,40,150.3,60,399
+
+Number of levels,4,154.0,55,392
+Number of levels,8,170.6,66,396
+Number of levels,12,149.5,59,355
+Number of levels,16,141.3,56,332
+
+Scale factor,1.1,153.6,59,385
+Scale factor,1.2,170.6,66,396
+Scale factor,1.3,150.7,62,352
+Scale factor,1.4,140.0,50,327
+
+Patch size,6,99.4,56,306
+Patch size,12,106.1,50,368
+Patch size,24,138.0,62,396
+Patch size,48,170.6,66,396
+
+
+rosario/sequence05
+parameter,setting,mean,min,max
+
+FAST Threshold,5,139.4,51,433
+FAST Threshold,10,139.4,51,433
+FAST Threshold,20,139.4,52,433
+FAST Threshold,40,126.5,45,404
+
+Number of levels,4,118.2,38,403
+Number of levels,8,133.2,49,421
+Number of levels,12,132.4,51,404
+Number of levels,16,125.7,45,383
+
+Scale factor,1.1,126.3,44,397
+Scale factor,1.2,133.2,49,421
+Scale factor,1.3,131.1,47,410
+Scale factor,1.4,124.3,45,392
+
+Patch size,6,104.3,47,353
+Patch size,12,107.9,47,385
+Patch size,24,133.2,49,421
+Patch size,48,141.4,40,399
+
+
+rosario/sequence06
+parameter,setting,mean,min,max
+
+FAST Threshold,5,126.6,37,431
+FAST Threshold,10,126.6,37,431
+FAST Threshold,20,126.7,35,432
+FAST Threshold,40,114.8,29,394
+
+Number of levels,4,93.3,42,340
+Number of levels,8,101.1,53,357
+Number of levels,12,102.3,51,368
+Number of levels,16,103.7,49,375
+
+Scale factor,1.1,102.8,47,345
+Scale factor,1.2,101.1,53,357
+Scale factor,1.3,97.0,35,366
+Scale factor,1.4,94.0,35,370
+
+Patch size,6,101.1,53,357
+Patch size,12,99.4,40,400
+Patch size,24,119.4,25,417
+Patch size,48,146.2,39,428
+
+

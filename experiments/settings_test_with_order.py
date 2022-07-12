@@ -39,7 +39,7 @@ class ORB:
         self.matches_img_nr = []
         self.sizes = [6, 12, 24, 48]
         self.fasttresh = [5, 10, 20, 40]
-        self.n_features = 2000
+        self.n_features = 500
         self.scale_factor = [1.1, 1.2, 1.3, 1.4]
         self.n_levels = [4, 8, 12, 16]
 
@@ -385,8 +385,8 @@ class ORB:
 
         cv.imwrite(self.max_min_img_folder + "_min_img.jpg" , min_img)
         cv.imwrite(self.max_min_img_folder + "_max_img.jpg" , max_img)
-        self.plotHistogram(min_img, "_min_img.jpg")
-        self.plotHistogram(max_img, "_max_img.jpg")
+        self.plotHistogram(min_img, "_min_img.png")
+        self.plotHistogram(max_img, "_max_img.png")
         #settings_plot = self.plotEffectSettings()
         #settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
         self.writeStatsToFile()
