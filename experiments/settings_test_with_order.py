@@ -39,7 +39,7 @@ class ORB:
         self.matches_img_nr = []
         self.sizes = [6, 12, 24, 48]
         self.fasttresh = [5, 10, 20, 40]
-        self.n_features = 500
+        self.n_features = 2000
         self.scale_factor = [1.1, 1.2, 1.3, 1.4]
         self.n_levels = [4, 8, 12, 16]
 
@@ -48,6 +48,7 @@ class ORB:
         self.n_levels_effect = []
         self.patch_size_effect = []
         self.fasttresh_effect = []
+        self.inliers = []
                 
         if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-1:][0]).split('.')[0]
@@ -104,32 +105,42 @@ class ORB:
             except:
                 continue
 
-    def filterMatches(self):
+    def filterMatches(self):  
         for image in range(len(self.matches)):
             matches_good = []
-            # ratio test as per Lowe's paper
-            '''
-            try:
-                for i,(m,n) in enumerate(self.matches[image]):
-                    if m.distance < 0.75*n.distance:
-                        matches_good.append(m)
-                self.matches_good.append(matches_good)
-            except ValueError:
-                pass
-            '''
-            try:
-                for i, descriptor in enumerate(self.matches[image]):
-                    if len(descriptor) == 2:
-                        if descriptor[0].distance < 0.75*descriptor[1].distance:
-                            matches_good.append(descriptor[0])
-                self.matches_good.append(matches_good)
-                    
-            except ValueError:
-                pass
+            if(self.matches[image]):
+                #matchesMask = [[0,0] for i in range(len(self.matches[image]))]
+                for i, match_pair in enumerate(self.matches[image]):
+                    try:
+                        m,n = match_pair
+                        if m.distance < 0.75*n.distance:
+                            #if 'matchesMask' in locals():
+                            #    matchesMask[i]=[1,0]
+                            matches_good.append(m)
+                    except(ValueError):
+                        pass
+            homo_mat, matchesMask = self.findHomography(matches_good, image)
+            self.inliers.append(matchesMask.count(1))
 
-        if len(self.matches_good) < 20:
+        if (matchesMask.count(1)) < 20:
             self.track_error += 1
-        
+
+    def findHomography(self, matches_good, img_pair):
+        MIN_MATCH_COUNT = 10
+        if len(matches_good)>MIN_MATCH_COUNT:
+            kp2 = (self.keypoints[img_pair+1])
+            kp1 = (self.keypoints[img_pair])
+
+            src_pts = np.float32([ kp1[m.queryIdx].pt for m in matches_good ]).reshape(-1,1,2)
+            dst_pts = np.float32([ kp2[m.trainIdx].pt for m in matches_good ]).reshape(-1,1,2)
+            M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
+            matchesMask = mask.ravel().tolist()
+        else:
+            M=None
+            n = len(matches_good)
+            matchesMask = [0]*n
+        return M, matchesMask
+
     def addImages(self, img):
         if img.shape[-1] == 3:
             img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -139,6 +150,10 @@ class ORB:
             img = cv.resize(img, (self.target_width, self.target_height))
         self.images.append(img)
 
+    def equalizeHist(self, img_gray):
+        img = cv.equalizeHist(img_gray)
+        return img
+
     def doMatching(self, orb):
         self.findKeyPoints(orb)
         self.matchKeyPointsBF() 
@@ -146,11 +161,7 @@ class ORB:
 
     def calcStats(self):
         stats_plot = plt.figure(1)
-        y = []
-        xint = range(0, len(self.matches_good))
-        for i in xint:
-            y.append(len(self.matches_good[i]))
-
+        y = self.inliers
         #std = round(np.std(y),1)
         mean = round(np.mean(y),1)
         #median = np.median(y)
@@ -169,6 +180,7 @@ class ORB:
         self.matches = []
         self.matches_good = []
         self.matches_img_nr = []
+        self.inliers = []
 
 
     def plotHistogram(self, img, extension):
@@ -401,8 +413,8 @@ if __name__ == "__main__":
     parser.add_argument('--ds_fps', help='Downsample fps to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--save_video', help='Save video with statistics', default=False)
-    #args = parser.parse_args()
-    args = parser.parse_args(["rosario", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/Rosario/sequence01.bag", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
+    args = parser.parse_args()
+    #args = parser.parse_args(["rosario", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/Rosario/sequence01.bag", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()

@@ -17,6 +17,7 @@ class ORB:
     def __init__(self, dataset, source, equalize, ds_fps, ds_resolution, save_video):
         self.source = source
         self.images = []
+        self.image_name = []
         self.keypoints = []
         self.descriptor = []
         self.matches = []
@@ -30,6 +31,7 @@ class ORB:
         self.save_hist_folder = self.histo_folder + self.dataset
         self.blur = []
         self.flow = []
+        self.contrast = []
         self.frame_stats = []
         self.target_fps = 10
         self.target_width, self.target_height = 672, 376
@@ -38,6 +40,7 @@ class ORB:
         self.track_error = 0
         self.save_video = bool(save_video)
         self.out = None
+        self.inliers = []
         
         if self.dataset == "flourish" or self.dataset == "rosario" or self.dataset == "own":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-1:][0]).split('.')[0]
@@ -61,6 +64,9 @@ class ORB:
         elif self.dataset == "kitti":
             self.save_extension = self.dataset + "/" + (self.source.split('/')[-2:][0])
             self.fps = 10
+        elif self.dataset == "slam":
+            self.save_extension = self.dataset + "/" + (self.source.split('/')[-1])
+            self.fps = 10
         else:
             self.save_extension = "test"
             self.fps = 10
@@ -74,7 +80,9 @@ class ORB:
         if os.path.exists(self.frame_stats_file):
             os.remove(self.frame_stats_file)
         if not os.path.exists(self.frame_stats_file):
-            header = ['patchsize', 'fasttresh', 'scalefactor', 'n_levels', 'track_error', 'features', 'total_matches', 'good_matches', 'blur', 'flow']
+            #header = ['patchsize', 'fasttresh', 'scalefactor', 'n_levels', 'track_error', 'features', 'total_matches', 'inliers', 'orbslam_features', 'orbslam_matches', 'blur', 'flow', 'contrast']
+            header = ['patchsize', 'fasttresh', 'scalefactor', 'n_levels', 'track_error', 'features', 'total_matches', 'inliers', 'blur', 'flow', 'contrast']
+
             with open(self.frame_stats_file, 'w') as statsfile:
                 writer = csv.writer(statsfile)
                 writer.writerow(header)
@@ -130,41 +138,74 @@ class ORB:
     def filterMatches(self, plot, out, patchsize, fasttresh, scalefactor, n_levels):
         pair_list = [*range(0, len(self.images), 2)]
         for image in range(len(self.matches)):
+            #img_pair = pair_list[image]
             matches_good = []
-            matchesMask = None
+            #matchesMask = None
             if(self.matches[image]):
-                matchesMask = [[0,0] for i in range(len(self.matches[image]))]
-                for i, pair in enumerate(self.matches[image]):
+                #matchesMask = [[0,0] for i in range(len(self.matches[image]))]
+                for i, match_pair in enumerate(self.matches[image]):
                     try:
-                        m,n = pair
+                        m,n = match_pair
                         if m.distance < 0.75*n.distance:
-                            if 'matchesMask' in locals():
-                                matchesMask[i]=[1,0]
+                            #if 'matchesMask' in locals():
+                            #    matchesMask[i]=[1,0]
                             matches_good.append(m)
                     except(ValueError):
                         pass
+            #homo_mat, matchesMask = self.findHomography(matches_good, img_pair)
+            homo_mat, matchesMask = self.findHomography(matches_good, image)
             self.matches_good.append(matches_good)
-            self.trackFrameStats(patchsize, fasttresh, scalefactor, n_levels, len(self.keypoints[image]), len(self.matches[image]), len(matches_good), self.blur[image], self.flow[image])
-            #self.savePlotAndVideo(plot, out, patchsize, fasttresh, scalefactor, n_levels, matchesMask, pair_list[image], image)
-            self.savePlotAndVideo(plot, out, patchsize, fasttresh, scalefactor, n_levels, matchesMask, pair_list, image)
+            self.inliers.append(matchesMask.count(1))
+            #orbslam_features = (self.image_name[image].split('_')[-1]).split('.')[0]
+            #orbslam_matches = (self.image_name[image].split('_')[-2])
+            flattened_img = np.asarray(self.images[image]).flatten()
+            contrast = round(np.std((flattened_img-np.min(flattened_img))/(np.max(flattened_img-np.min(flattened_img)))),2)
+            self.contrast.append(contrast)
+            #self.trackFrameStats(patchsize, fasttresh, scalefactor, n_levels, len(self.keypoints[image]), len(self.matches[image]), matchesMask.count(1), orbslam_features, orbslam_matches,self.blur[image], self.flow[image], contrast)
+            self.trackFrameStats(patchsize, fasttresh, scalefactor, n_levels, len(self.keypoints[image]), len(self.matches[image]), matchesMask.count(1), self.blur[image], self.flow[image], contrast)
 
-        if len(self.matches_good) < 20:
+            #self.savePlotAndVideo(plot, out, patchsize, fasttresh, scalefactor, n_levels, matchesMask, img_pair, image, matches_good)
+            self.savePlotAndVideo(plot, out, patchsize, fasttresh, scalefactor, n_levels, matchesMask, pair_list, image,matches_good)
+
+        if (matchesMask.count(1)) < 20:
             self.track_error += 1
         if self.save_video:
             out.release()
             cv.destroyAllWindows()
-        
+
+    def findHomography(self, matches_good, img_pair):
+        MIN_MATCH_COUNT = 10
+        if len(matches_good)>MIN_MATCH_COUNT:
+            kp2 = (self.keypoints[img_pair+1])
+            kp1 = (self.keypoints[img_pair])
+
+            src_pts = np.float32([ kp1[m.queryIdx].pt for m in matches_good ]).reshape(-1,1,2)
+            dst_pts = np.float32([ kp2[m.trainIdx].pt for m in matches_good ]).reshape(-1,1,2)
+            M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
+            matchesMask = mask.ravel().tolist()
+        else:
+            M=None
+            n = len(matches_good)
+            matchesMask = [0]*n
+        return M, matchesMask
+
 
         
 
-    def savePlotAndVideo(self, plot, out, patchsize, fasttresh, scalefactor, n_levels, matchesMask, pair, image):
+    def savePlotAndVideo(self, plot, out, patchsize, fasttresh, scalefactor, n_levels, matchesMask, pair, image, matches_good):
         if plot==True or self.save_video:
-            draw_params = dict(matchColor = (0,255,0),
-                    singlePointColor = (0,0,255),
-                    matchesMask = matchesMask,
-                    flags = cv.DrawMatchesFlags_DEFAULT)
-            #img = cv.drawMatchesKnn(self.images[pair],self.keypoints[pair],self.images[pair+1],self.keypoints[pair+1],self.matches[image],None,**draw_params)
-            img = cv.drawMatchesKnn(self.images[image],self.keypoints[image],self.images[image+1],self.keypoints[image+1],self.matches[image],None,**draw_params)
+            draw_params = dict(matchColor = (0,255,0), # draw matches in green color
+                   singlePointColor = (0,0,255),
+                   matchesMask = matchesMask, # draw only inliers
+                   flags = cv.DrawMatchesFlags_DEFAULT)
+            
+            #img1, img2 = self.images[pair], self.images[pair+1]
+            #kp1, kp2 = self.keypoints[pair], self.keypoints[pair+1]
+            #img = cv.drawMatchesKnn(img1,self.keypoints[pair],img2,self.keypoints[pair+1],matches_good,None,**draw_params)
+            #img = cv.drawMatches(img1,kp1,img2,kp2,matches_good,None,**draw_params)
+            
+            img1, img2 = self.images[image], self.images[image+1]
+            img = cv.drawMatches(img1,self.keypoints[image],img2,self.keypoints[image+1],matches_good,None,**draw_params)
             if plot==True:
                 plt.figure(2)          
                 plt.imshow(img)
@@ -174,24 +215,23 @@ class ORB:
                 patchsize = self.frame_stats[-1][0]
                 fasttresh = self.frame_stats[-1][1]
                 total_matches = self.frame_stats[-1][6]
-                good_matches = self.frame_stats[-1][7]
+                inliers = self.frame_stats[-1][7]
                 blur = self.frame_stats[-1][8]
                 flow = self.frame_stats[-1][9]
+                contrast = self.frame_stats[-1][10]
 
                 cv.rectangle(img,(0, int(4*img.shape[0]/5)),(int(img.shape[1]/5),int(img.shape[0])),(0,0,0),-1)
                 font = cv.FONT_HERSHEY_SIMPLEX 
                 cv.putText(img, "patch: {patchsize}, ftresh: {fasttresh}, scale: {scale}, levels: {nlevels}".format(patchsize = str(patchsize), fasttresh = str(fasttresh), scale=scalefactor, nlevels=n_levels),(0 , int(4*img.shape[0]/5+10)), font, 0.4,(255,255,255),1,cv.LINE_AA)
                 cv.putText(img, "track error: {track_error}".format(track_error = str(self.track_error)),(0 , int(4*img.shape[0]/5+30)), font, 0.4,(255,255,255),1,cv.LINE_AA)
-                cv.putText(img, "total matches: {total_matches} good matches: {good_matches}".format(total_matches=str(total_matches), good_matches=str(good_matches)),(0 , int(4*img.shape[0]/5+50)), font, 0.4,(255,255,255),1,cv.LINE_AA)
-                cv.putText(img, "blur: {blur} flow: {flow}".format(blur=str(round(blur)), flow=str(round(flow))),(0 , int(4*img.shape[0]/5+70)), font, 0.4,(255,255,255),1,cv.LINE_AA)
-
+                cv.putText(img, "total matches: {total_matches} inliers: {inliers}".format(total_matches=str(total_matches), inliers=str(inliers)),(0 , int(4*img.shape[0]/5+50)), font, 0.4,(255,255,255),1,cv.LINE_AA)
+                cv.putText(img, "blur: {blur} flow: {flow} contrast: {contrast}".format(blur=str(round(blur)), flow=str(round(flow)), contrast=str(contrast)),(0 , int(4*img.shape[0]/5+70)), font, 0.4,(255,255,255),1,cv.LINE_AA)
                 out.write(img)
 
 
     def calculateFlow(self):
         for i in range(len(self.images)-1):
             flow = cv.calcOpticalFlowFarneback(self.images[i], self.images[i+1], None, 0.5, 3, 15, 3, 5, 1.2, 0)
-            #mag, ang = cv.cartToPolar(flow[..., 0], flow[..., 1])
             mag, ang = self.cartToPol(flow[..., 0], flow[..., 1])
             self.flow.append(np.mean(mag))
 
@@ -228,12 +268,18 @@ class ORB:
         features_median = np.median(features)
         features_spread= np.max(features)-np.min(features)
         features_min = np.min(features)
-        
+
+        contrast_std = round(np.std(self.contrast),2)
+        contrast_mean = round(np.mean(self.contrast),2)
+        contrast_median =np.median(self.contrast)
+        contrast_maximum = np.max(self.contrast)
+        contrast_spread = round((np.max(self.contrast)-np.min(self.contrast)),2)
 
         data_dict = {'track_error': int(self.track_error), 'match_mean': float(match_mean), 'match_std': float(match_std), 'match_median': float(match_median), 'match_minimum': int(match_minimum), \
             'match_spread': int(match_spread), 'patchsize': int(patchsize), 'fasttresh': int(fasttresh), 'blur_mean': float(blur_mean), 'blur_std': float(blur_std), 'blur_median': float(blur_median), \
                 'blur_maximum': float(blur_maximum), 'blur_spread': float(blur_spread), 'flow_mean': float(flow_mean), 'flow_std': float(flow_std), 'flow_median': float(flow_median), 'flow_maximum': float(flow_maximum), 'flow_spread': float(flow_spread), \
-                 'features_mean': float(features_mean), 'features_std': float(features_std), 'features_median': float(features_median), 'features_minimum': int(features_min), 'features_spread': int(features_spread)}
+                 'features_mean': float(features_mean), 'features_std': float(features_std), 'features_median': float(features_median), 'features_minimum': int(features_min), 'features_spread': int(features_spread), 'contrast_mean':float(contrast_mean), \
+                    'contrast_std':float(contrast_std), 'contrast_median':float(contrast_median), 'contrast_maximum':float(contrast_maximum), 'contrast_spread':float(contrast_spread)}
         data = {self.save_extension : data_dict}
         with open(self.statsfile, "a") as file:
             yaml.dump(data, file)
@@ -242,10 +288,14 @@ class ORB:
 
     def plotStats(self, patchsize, fasttresh, n_levels, scalefactor):
         stats_plot = plt.figure(1)
-        y = []
         xint = range(0, len(self.matches_good))
+        y = self.inliers
+        '''
+        y = []
         for i in xint:
             y.append(len(self.matches_good[i]))
+        plt.plot(xint, y)
+        '''
         plt.plot(xint, y)
         plt.axhline(np.mean(y), linestyle='--')
 
@@ -270,7 +320,7 @@ class ORB:
         plt.plot(histg)
         plt.savefig(self.histo_folder + self.save_extension + ".png")
 
-    def addImages(self, img):
+    def addImages(self, img, filename):
         if img.shape[-1] == 3:
             img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         if self.equalize == True:
@@ -278,6 +328,7 @@ class ORB:
         if self.ds_resolution == True:
             img = cv.resize(img, (self.target_width, self.target_height))
         self.images.append(img)
+        self.image_name.append(filename)
         self.blur.append(self.variance_of_laplacian(img))
     
     def removeNonBestVideos(self, patchsize, fasttresh):
@@ -288,8 +339,10 @@ class ORB:
             else:
                 os.remove(folder + "/" + file)
 
-    def trackFrameStats(self, patchsize, fasttresh, scalefactor, n_levels, features, matches, matches_good, blur, flow):
-        data = [patchsize, fasttresh, scalefactor, n_levels, self.track_error, features, matches, matches_good, blur, flow]
+    def trackFrameStats(self, patchsize, fasttresh, scalefactor, n_levels, features, matches, inliers, blur, flow, contrast):
+    #def trackFrameStats(self, patchsize, fasttresh, scalefactor, n_levels, features, matches, inliers,orbslam_features,  orbslam_matches, blur, flow, contrast):
+        #data = [patchsize, fasttresh, scalefactor, n_levels, self.track_error, features, matches, inliers, orbslam_features, orbslam_matches,blur, flow, contrast]
+        data = [patchsize, fasttresh, scalefactor, n_levels, self.track_error, features, matches, inliers, blur, flow, contrast]
         self.frame_stats.append(data)
 
     
@@ -314,9 +367,9 @@ class ORB:
                     if self.ds_fps and (self.fps != self.target_fps):
                         img_idx +=1
                         if img_idx % (self.fps/(self.fps-self.target_fps)) != 0:
-                            self.addImages(img)
+                            self.addImages(img, filename)
                     else:
-                        self.addImages(img)
+                        self.addImages(img,filename)
             bag.close()
 
         else:
@@ -324,18 +377,18 @@ class ORB:
                 img = cv.imread(os.path.join(self.source,filename))
                 if img is not None and len(img) != 0:
                     if self.ds_fps and (self.fps != self.target_fps):
-                        i +=1
-                        if i % (self.fps/(self.fps-self.target_fps)) != 0:
-                            self.addImages(img)
+                        img_idx +=1
+                        if img_idx % (self.fps/(self.fps-self.target_fps)) != 0:
+                            self.addImages(img, filename)
                     else:
-                        self.addImages(img)
+                        self.addImages(img, filename)
         print("Read all images")
 
         print('Calculating optical flow between all images')
         self.calculateFlow()
 
-        sizes = [31] #[6, 12, 24, 48]
-        fasttresh = [40, 14] #[5, 10, 20, 40]
+        sizes = [48] #[31] [6, 12, 24, 48]
+        fasttresh = [5] #[5, 10, 20, 40]
         scale_factor = [1.2]#[1.1, 1.2, 1.3, 1.4]
         n_levels = [8] #[4, 8, 12, 16]
         n_features = 2000
@@ -384,7 +437,7 @@ class ORB:
                         if size_idx == (len(sizes)-1) and scalefactor_idx==(len(scale_factor)-1) and levels_idx==(len(n_levels)-1) and fasttresh_idx==(len(fasttresh)-1):
                             best_plt.savefig(self.stats_folder + self.save_extension + ".png")
                             self.writeStatsToFile(best_std, best_mean, best_median, best_min, best_spread, best_patchsize, best_fasttresh)
-                            self.writeFrameStats(best_patchsize, best_fasttresh,  best_scale, best_levels)
+                            self.writeFrameStats(best_patchsize, best_fasttresh, best_scale, best_levels)
                             self.removeNonBestVideos(best_patchsize, best_fasttresh)
                         
                         self.track_error = 0
@@ -392,6 +445,8 @@ class ORB:
                         self.descriptor = []
                         self.matches = []
                         self.matches_good = []
+                        self.inliers = []
+                        self.contrast = []
                         plt.close('all')
 
 
@@ -403,16 +458,10 @@ if __name__ == "__main__":
     parser.add_argument('--ds_fps', help='Downsample fps to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--save_video', help='Save video with statistics', default=False)
-    #args = parser.parse_args()
-    #args = parser.parse_args(["own_test", "--source", "/home/meltem/thesis_orbslam/imgs_failed_match_juno/", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "True", "--equalize", "True"])
-    args = parser.parse_args(["own", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/Own/den_boer_mc0038_20220613_095019_sunny.bag", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "True"])
+    args = parser.parse_args()
+    #args = parser.parse_args(["euroc", "--source", "/media/meltem/moo/EuRoC/MH01/mav0/cam0/data", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "True", "--equalize", "False"])
+    #args = parser.parse_args(["slam", "--source", "/home/meltem/thesis_orbslam/imgs_failed_match_juno/imgs_failed_match_juno_den_boer_sunny", "--ds_fps", "False", "--save_video", "True"])
     
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()
-    #scatterplot met effecten van verschillende orb settings maken.
-    # plots maken met behaviour vana mount of tracking failures in ORB-SLAM vs statistics van de dataset om te kijken welke een indicatie is van
-    # tracking failure (mean, min, spread?)
-    #performance metric: hoe vaak matches onder 20 komen.
-    #own data with distorted view?
-    # use frequentist approach, independent t-test (check conditions first; Independence of observations, Homogeneity of variance, Normality of data)

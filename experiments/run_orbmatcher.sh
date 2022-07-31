@@ -11,8 +11,18 @@ kittiPath="${datasetPath}/kitti"
 ownPath="${datasetPath}/Own"
 #otherArgs="--ds_fps True"
 otherArgs="--save_video True"
+junoPath="/home/meltem/thesis_orbslam/imgs_failed_match_juno"
+
+python $scriptPath slam --source "${junoPath}/imgs_failed_match_juno_adrichem_after_rain" $otherArgs
+python $scriptPath slam --source "${junoPath}/imgs_failed_match_juno_adrichem_dark" $otherArgs
+python $scriptPath slam --source "${junoPath}/imgs_failed_match_juno_adrichem_sunny" $otherArgs
+python $scriptPath slam --source "${junoPath}/imgs_failed_match_juno_den_boer_after_rain" $otherArgs
+python $scriptPath slam --source "${junoPath}/imgs_failed_match_juno_den_boer_dark" $otherArgs
+python $scriptPath slam --source "${junoPath}/imgs_failed_match_juno_den_boer_rain" $otherArgs
+python $scriptPath slam --source "${junoPath}/imgs_failed_match_juno_den_boer_sunny" $otherArgs
 
 
+: '
 python $scriptPath own --source "${ownPath}/den_boer_mc0038_20220613_095019_sunny.bag" $otherArgs
 python $scriptPath own --source "${ownPath}/den_boer_mc0038_20220615_005023_dark.bag" $otherArgs
 python $scriptPath own --source "${ownPath}/den_boer_mc0038_20220619_075057_rain.bag" $otherArgs
@@ -121,4 +131,5 @@ python $scriptPath seasons --source "${seasonsPath}/old_town/loop4/distorted_ima
 python $scriptPath seasons --source "${seasonsPath}/parking_garage/loop1/distorted_images/cam0" $otherArgs
 python $scriptPath seasons --source "${seasonsPath}/parking_garage/loop2/distorted_images/cam0" $otherArgs
 python $scriptPath seasons --source "${seasonsPath}/parking_garage/loop3/distorted_images/cam0" $otherArgs
+'
 

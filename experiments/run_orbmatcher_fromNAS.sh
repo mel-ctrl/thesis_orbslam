@@ -1,7 +1,7 @@
 #!/bin/bash
 
 currentPath=`pwd`
-scriptPath="${currentPath}/orb.py"
+scriptPath="${currentPath}/settings_test_with_order.py"
 datasetPath="/home/meltem/imow_line/visionTeam/Meltem/Datasets"
 rosarioPath="${datasetPath}/Rosario"
 flourishPath="${datasetPath}/Flourish"
@@ -10,9 +10,9 @@ seasonsPath="${datasetPath}/4seasons"
 kittiPath="${datasetPath}/kitti"
 ownPath="${datasetPath}/Own"
 #otherArgs="--ds_fps True"
-otherArgs="--save_video True"
+otherArgs="--equalize True"
 
-: '
+
 python $scriptPath rosario --source "${rosarioPath}/sequence01.bag" $otherArgs
 python $scriptPath rosario --source "${rosarioPath}/sequence02.bag" $otherArgs
 python $scriptPath rosario --source "${rosarioPath}/sequence03.bag" $otherArgs
@@ -33,9 +33,9 @@ python $scriptPath own --source "${ownPath}/mc0006_20220523_232418_road_dark_cor
 
 python $scriptPath own --source "${ownPath}/mc0006_20220523_232418_grass_normal_corrected.bag" $otherArgs
 python $scriptPath own --source "${ownPath}/mc0006_20220523_232418_road_normal_corrected.bag" $otherArgs
-'
+
 python $scriptPath own --source "${ownPath}/den_boer_mc0038_20220613_095019_sunny.bag" $otherArgs
-: '
+
 python $scriptPath own --source "${ownPath}/den_boer_mc0038_20220615_005023_dark.bag" $otherArgs
 python $scriptPath own --source "${ownPath}/den_boer_mc0038_20220619_075057_rain.bag" $otherArgs
 python $scriptPath own --source "${ownPath}/den_boer_mc0038_20220619_080430_after_rain.bag" $otherArgs
@@ -122,4 +122,3 @@ python $scriptPath seasons --source "${seasonsPath}/old_town/loop4/distorted_ima
 python $scriptPath seasons --source "${seasonsPath}/parking_garage/loop1/distorted_images/cam0" $otherArgs
 python $scriptPath seasons --source "${seasonsPath}/parking_garage/loop2/distorted_images/cam0" $otherArgs
 python $scriptPath seasons --source "${seasonsPath}/parking_garage/loop3/distorted_images/cam0" $otherArgs
-'
