@@ -1153,6 +1153,10 @@ void TemplatedVocabulary<TDescriptor,F>::transform(
       // w is the idf value if TF_IDF, 1 if TF
       
       transform(*fit, id, w, &nid, levelsup);
+      if (i_feature == 0){
+          std::cout << id << "," << w << ",    " << nid  << std::endl;
+      }
+      
       
       if(w > 0) // not stopped
       { 

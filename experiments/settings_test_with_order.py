@@ -1,4 +1,5 @@
 from ast import parse
+from pyexpat import features
 from cv2 import ORB_HARRIS_SCORE, imshow
 import numpy as np
 import cv2 as cv
@@ -162,16 +163,25 @@ class ORB:
     def calcStats(self):
         stats_plot = plt.figure(1)
         y = self.inliers
+        features =[len(i) for i in self.keypoints]
+        min_features = np.min(features)
+        max_features = np.max(features)
+        min_features_img = self.images[np.argmin(features)]
+        max_features_img = self.images[np.argmax(features)]
         #std = round(np.std(y),1)
         mean = round(np.mean(y),1)
         #median = np.median(y)
         #spread = np.max(y)-np.min(y)
-        min = np.min(y)
-        min_img = self.images[self.matches_img_nr[np.argmin(y)]]
-        max_img = self.images[self.matches_img_nr[np.argmax(y)]]
+        min_inliers = np.min(y)
+        max_inliers = np.max(y)
+        min_inliers_img = self.images[self.matches_img_nr[np.argmin(y)]]
+        max_inliers_img = self.images[self.matches_img_nr[np.argmax(y)]]
+
+        min_img_pair_prev = self.images[self.matches_img_nr[np.argmin(y)-1]]
+        max_img_pair_prev = self.images[self.matches_img_nr[np.argmax(y)-1]]
 
 
-        return mean, min, min_img, max_img
+        return mean, min_features, max_features, min_features_img, max_features_img, min_inliers, max_inliers, min_inliers_img, max_inliers_img, min_img_pair_prev, max_img_pair_prev
 
     def clearResults(self):
         self.track_error = 0
@@ -354,54 +364,60 @@ class ORB:
                         self.addImages(img)
         print("Read all images")
 
-
+        '''
         for i in range(len(self.fasttresh)):
             orb = cv.ORB_create(fastThreshold=self.fasttresh[i], nfeatures=self.n_features)
             self.doMatching(orb)
-            mean, min, min_img, max_img = self.calcStats()
-            self.fasttresh_effect.append([mean,min])
+            mean, min_features, max_features, min_features_img, max_features_img, min_inliers, max_inliers, min_inliers_img, max_inliers_img, min_img_pair_prev, max_img_pair_prev = self.calcStats()
+            self.fasttresh_effect.append([mean,min_inliers])
             self.clearResults()
         
         besttresh_idx = np.argmax(np.asarray(self.fasttresh_effect)[:,1])
 
         for i in range(len(self.sizes)):
-            orb = cv.ORB_create(edgeThreshold=self.sizes[i], patchSize=self.sizes[i], fastThreshold=self.fasttresh[besttresh_idx])
+            orb = cv.ORB_create(edgeThreshold=self.sizes[i], patchSize=self.sizes[i], fastThreshold=self.fasttresh[besttresh_idx], nfeatures=self.n_features)
             self.doMatching(orb)
-            mean, min, min_img, max_img = self.calcStats()
-            self.patch_size_effect.append([mean,min])
+            mean, min_features, max_features, min_features_img, max_features_img, min_inliers, max_inliers, min_inliers_img, max_inliers_img, min_img_pair_prev, max_img_pair_prev= self.calcStats()
+            self.patch_size_effect.append([mean,min_inliers])
             self.clearResults()
         
         bestsize_idx = np.argmax(np.asarray(self.patch_size_effect)[:,1])
 
         for i in range(len(self.scale_factor)):
-            orb = cv.ORB_create(scaleFactor=self.scale_factor[i], edgeThreshold=self.sizes[bestsize_idx], patchSize=self.sizes[bestsize_idx], fastThreshold=self.fasttresh[besttresh_idx])
+            orb = cv.ORB_create(scaleFactor=self.scale_factor[i], edgeThreshold=self.sizes[bestsize_idx], patchSize=self.sizes[bestsize_idx], fastThreshold=self.fasttresh[besttresh_idx],nfeatures=self.n_features)
             self.doMatching(orb)
-            mean, min, min_img, max_img = self.calcStats()
-            self.scale_factor_effect.append([mean,min])
+            mean, min_features, max_features, min_features_img, max_features_img, min_inliers, max_inliers, min_inliers_img, max_inliers_img, min_img_pair_prev, max_img_pair_prev = self.calcStats()
+            self.scale_factor_effect.append([mean,min_inliers])
             self.clearResults()
 
         bestscale_idx = np.argmax(np.asarray(self.scale_factor_effect)[:,1])
         
         for i in range(len(self.n_levels)):
-            orb = cv.ORB_create(nlevels=self.n_levels[i], scaleFactor=self.scale_factor[bestscale_idx], edgeThreshold=self.sizes[bestsize_idx], patchSize=self.sizes[bestsize_idx], fastThreshold=self.fasttresh[besttresh_idx])
+            orb = cv.ORB_create(nlevels=self.n_levels[i], scaleFactor=self.scale_factor[bestscale_idx], edgeThreshold=self.sizes[bestsize_idx], patchSize=self.sizes[bestsize_idx], fastThreshold=self.fasttresh[besttresh_idx], nfeatures=self.n_features)
             self.doMatching(orb)
-            mean, min, min_img, max_img = self.calcStats()
-            self.n_levels_effect.append([mean,min])
+            mean, min_features, max_features, min_features_img, max_features_img, min_inliers, max_inliers, min_inliers_img, max_inliers_img, min_img_pair_prev, max_img_pair_prev = self.calcStats()
+            self.n_levels_effect.append([mean,min_inliers])
             self.clearResults()
 
         bestlevel_idx = np.argmax(np.asarray(self.n_levels_effect)[:,1])
 
-        orb = cv.ORB_create(nlevels=self.n_levels[bestlevel_idx], scaleFactor=self.scale_factor[bestscale_idx], edgeThreshold=self.sizes[bestsize_idx], patchSize=self.sizes[bestsize_idx], fastThreshold=self.fasttresh[besttresh_idx])
+        orb = cv.ORB_create(nfeatures = self.n_features, nlevels=self.n_levels[bestlevel_idx], scaleFactor=self.scale_factor[bestscale_idx], edgeThreshold=self.sizes[bestsize_idx], patchSize=self.sizes[bestsize_idx], fastThreshold=self.fasttresh[besttresh_idx])
+        '''
+        orb = cv.ORB_create(nfeatures = self.n_features, nlevels=8, scaleFactor=1.2, edgeThreshold=48, patchSize=48, fastThreshold=5)
         self.doMatching(orb)
-        mean, min, min_img, max_img= self.calcStats()
+        mean, min_features, max_features, min_features_img, max_features_img, min_inliers, max_inliers, min_inliers_img, max_inliers_img, min_img_pair_prev, max_img_pair_prev= self.calcStats()
 
-        cv.imwrite(self.max_min_img_folder + "_min_img.jpg" , min_img)
-        cv.imwrite(self.max_min_img_folder + "_max_img.jpg" , max_img)
-        self.plotHistogram(min_img, "_min_img.png")
-        self.plotHistogram(max_img, "_max_img.png")
+        cv.imwrite(self.max_min_img_folder + "_min_inliers_" + str(min_inliers) +".jpg" , min_inliers_img)
+        cv.imwrite(self.max_min_img_folder + "_max_inliers_" + str(max_inliers) +".jpg" , max_inliers_img)
+        cv.imwrite(self.max_min_img_folder + "_min_inliers_prev_" + str(min_inliers) +".jpg" , min_img_pair_prev)
+        cv.imwrite(self.max_min_img_folder + "_max_inliers_prev_" + str(max_inliers) +".jpg" , max_img_pair_prev)
+        cv.imwrite(self.max_min_img_folder + "_min_features_" + str(min_features) +".jpg" , min_features_img)
+        cv.imwrite(self.max_min_img_folder + "_max_features_" + str(max_features) +".jpg" , max_features_img)
+        self.plotHistogram(min_inliers_img, "_min_img.png")
+        self.plotHistogram(max_inliers_img, "_max_img.png")
         #settings_plot = self.plotEffectSettings()
         #settings_plot.savefig(self.stats_folder + self.save_extension + "_settings.png")
-        self.writeStatsToFile()
+        #self.writeStatsToFile()
 
 
 
@@ -414,7 +430,7 @@ if __name__ == "__main__":
     parser.add_argument('--ds_resolution', help='Downsample resolution to equalize evaluation between datasets, True or False', default=False)
     parser.add_argument('--save_video', help='Save video with statistics', default=False)
     args = parser.parse_args()
-    #args = parser.parse_args(["rosario", "--source", "/home/meltem/imow_line/visionTeam/Meltem/Datasets/Rosario/sequence01.bag", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
+    #args = parser.parse_args(["euroc", "--source", "/media/meltem/moo/EuRoC/MH01/mav0/cam0/data", "--ds_fps", "False", "--ds_resolution", "False", "--save_video", "False"])
     object = ORB(args.dataset, args.source, args.equalize, args.ds_fps, args.ds_resolution, args.save_video)
     print("Settings set to equalize: {equalize}, downsample_fps: {ds_fps}, downsample_image: {ds_img}, save_video: {savevid}".format(equalize = args.equalize, ds_fps=args.ds_fps, ds_img=args.ds_resolution, savevid=args.save_video))
     object.main()

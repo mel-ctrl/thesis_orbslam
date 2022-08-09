@@ -645,6 +645,7 @@ namespace ORB_SLAM3
         return nmatches;
     }
 
+
     int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f> &vbPrevMatched, vector<int> &vnMatches12, int windowSize)
     {
         int nmatches=0;

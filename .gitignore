@@ -104,7 +104,7 @@ Table_TUMVI_rooms/
 *.osa
 .idea/
 my_settings.txt
-
+experiments/jupyter/statistics_results
 borrar/*
 
 */ExecMean.txt

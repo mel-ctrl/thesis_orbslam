@@ -2732,18 +2732,17 @@ bool Tracking::TrackReferenceKeyFrame()
 {
     // Compute Bag of Words vector
     mCurrentFrame.ComputeBoW();
-
     // We perform first an ORB matching with the reference keyframe
     // If enough matches are found we setup a PnP solver
-    ORBmatcher matcher(0.9,true); //0.7
+    ORBmatcher matcher(0.75,true); //0.7
     vector<MapPoint*> vpMapPointMatches;
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
     if(nmatches<15)
     {
         cout << "TRACK_REF_KF: Less than 15 matches!!\n";
-        SaveTrackImg(mCurrentFrame.leftImg,  ("current_nofilter_" + std::to_string(nmatches)));
-        SaveTrackImg(mLastFrame.leftImg, ("last_nofilter_" + std::to_string(nmatches)));
+        SaveTrackImg(mCurrentFrame.leftImg, ("current_nofilter_" + std::to_string(nmatches) + "_" + std::to_string(mCurrentFrame.mDescriptors.rows) + "_" + std::to_string(mCurrentFrame.mSequence)));
+        SaveTrackImg(mLastFrame.leftImg, ("last_nofilter_" + std::to_string(nmatches) + "_" + std::to_string(mCurrentFrame.mDescriptors.rows) + "_" + std::to_string(mCurrentFrame.mSequence)));
         return false;
     }
 
@@ -3654,7 +3653,6 @@ bool Tracking::Relocalization()
     Verbose::PrintMess("Starting relocalization", Verbose::VERBOSITY_NORMAL);
     // Compute Bag of Words Vector
     mCurrentFrame.ComputeBoW();
-
     // Relocalization is performed when tracking is lost
     // Track Lost: Query KeyFrame Database for keyframe candidates for relocalisation
     vector<KeyFrame*> vpCandidateKFs = mpKeyFrameDB->DetectRelocalizationCandidates(&mCurrentFrame, mpAtlas->GetCurrentMap());
