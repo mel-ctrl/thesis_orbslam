@@ -10,7 +10,7 @@ seasonsPath="/media/meltem/T7/4seasons"
 kittiPath="${datasetPath}/kitti"
 ownPath="${datasetPath}/Own"
 #otherArgs="--ds_fps True"
-#otherArgs="--equalize True"
+otherArgs="--equalize True"
 
 python $scriptPath rosario --source "${rosarioPath}/sequence01.bag" $otherArgs
 python $scriptPath rosario --source "${rosarioPath}/sequence02.bag" $otherArgs

@@ -1,0 +1,864 @@
+seasons/highway/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,826.4,172
+FAST Threshold,10,823.3,173
+FAST Threshold,20,794.5,176
+FAST Threshold,40,629.7,41
+
+Number of levels,4,688.5,157
+Number of levels,8,692.0,167
+Number of levels,12,649.0,154
+Number of levels,16,635.2,158
+
+Scale factor,1.1,724.7,148
+Scale factor,1.2,732.5,155
+Scale factor,1.3,692.0,167
+Scale factor,1.4,643.6,166
+
+Patch size,6,392.9,78
+Patch size,12,557.9,114
+Patch size,24,732.5,155
+Patch size,48,742.1,147
+
+
+seasons/highway/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,706.6,120
+FAST Threshold,10,697.1,113
+FAST Threshold,20,618.4,105
+FAST Threshold,40,379.9,28
+
+Number of levels,4,566.5,128
+Number of levels,8,618.8,137
+Number of levels,12,649.8,156
+Number of levels,16,673.1,136
+
+Scale factor,1.1,618.8,137
+Scale factor,1.2,635.9,131
+Scale factor,1.3,614.7,123
+Scale factor,1.4,564.4,105
+
+Patch size,6,252.9,26
+Patch size,12,428.4,96
+Patch size,24,635.9,131
+Patch size,48,708.8,122
+
+
+seasons/office_loop/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,769.7,134
+FAST Threshold,10,769.3,116
+FAST Threshold,20,755.1,127
+FAST Threshold,40,678.5,83
+
+Number of levels,4,740.8,125
+Number of levels,8,787.8,165
+Number of levels,12,815.5,155
+Number of levels,16,769.8,155
+
+Scale factor,1.1,787.8,165
+Scale factor,1.2,794.0,153
+Scale factor,1.3,699.8,145
+Scale factor,1.4,656.8,136
+
+Patch size,6,343.5,18
+Patch size,12,494.6,86
+Patch size,24,686.7,127
+Patch size,48,794.0,153
+
+
+seasons/office_loop/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,699.4,141
+FAST Threshold,10,698.2,123
+FAST Threshold,20,686.2,112
+FAST Threshold,40,623.0,70
+
+Number of levels,4,566.8,115
+Number of levels,8,617.9,143
+Number of levels,12,625.1,132
+Number of levels,16,591.8,138
+
+Scale factor,1.1,592.7,117
+Scale factor,1.2,617.9,143
+Scale factor,1.3,610.4,132
+Scale factor,1.4,569.9,119
+
+Patch size,6,292.7,18
+Patch size,12,430.9,74
+Patch size,24,617.9,143
+Patch size,48,730.3,125
+
+
+seasons/office_loop/loop3
+parameter,setting,mean,min
+
+FAST Threshold,5,751.3,100
+FAST Threshold,10,749.4,90
+FAST Threshold,20,710.1,95
+FAST Threshold,40,511.1,55
+
+Number of levels,4,774.8,109
+Number of levels,8,778.4,119
+Number of levels,12,688.3,81
+Number of levels,16,652.1,82
+
+Scale factor,1.1,770.4,72
+Scale factor,1.2,778.4,119
+Scale factor,1.3,687.7,95
+Scale factor,1.4,644.4,107
+
+Patch size,6,326.8,14
+Patch size,12,482.8,53
+Patch size,24,679.2,86
+Patch size,48,778.4,119
+
+
+seasons/office_loop/loop4
+parameter,setting,mean,min
+
+FAST Threshold,5,767.5,171
+FAST Threshold,10,767.9,194
+FAST Threshold,20,744.2,191
+FAST Threshold,40,527.5,115
+
+Number of levels,4,781.1,198
+Number of levels,8,776.5,185
+Number of levels,12,688.8,164
+Number of levels,16,653.5,172
+
+Scale factor,1.1,778.8,170
+Scale factor,1.2,776.5,185
+Scale factor,1.3,688.2,141
+Scale factor,1.4,646.5,133
+
+Patch size,6,359.5,44
+Patch size,12,511.0,104
+Patch size,24,694.4,162
+Patch size,48,776.5,185
+
+
+seasons/office_loop/loop5
+parameter,setting,mean,min
+
+FAST Threshold,5,628.1,247
+FAST Threshold,10,627.0,249
+FAST Threshold,20,592.1,222
+FAST Threshold,40,392.9,39
+
+Number of levels,4,671.5,266
+Number of levels,8,667.3,289
+Number of levels,12,592.7,263
+Number of levels,16,563.1,231
+
+Scale factor,1.1,668.3,233
+Scale factor,1.2,667.3,289
+Scale factor,1.3,592.5,273
+Scale factor,1.4,555.6,238
+
+Patch size,6,174.4,12
+Patch size,12,319.6,91
+Patch size,24,535.3,202
+Patch size,48,667.3,289
+
+
+seasons/office_loop/loop6
+parameter,setting,mean,min
+
+FAST Threshold,5,719.6,152
+FAST Threshold,10,719.7,136
+FAST Threshold,20,696.0,150
+FAST Threshold,40,567.1,67
+
+Number of levels,4,702.5,126
+Number of levels,8,745.9,155
+Number of levels,12,772.7,164
+Number of levels,16,736.4,159
+
+Scale factor,1.1,745.9,155
+Scale factor,1.2,755.2,148
+Scale factor,1.3,664.6,129
+Scale factor,1.4,620.8,124
+
+Patch size,6,314.9,25
+Patch size,12,456.3,84
+Patch size,24,649.2,146
+Patch size,48,755.2,148
+
+
+seasons/neighborhood/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,819.6,281
+FAST Threshold,10,809.1,236
+FAST Threshold,20,751.2,183
+FAST Threshold,40,519.2,71
+
+Number of levels,4,836.1,270
+Number of levels,8,825.3,287
+Number of levels,12,731.7,245
+Number of levels,16,693.6,239
+
+Scale factor,1.1,836.9,235
+Scale factor,1.2,825.3,287
+Scale factor,1.3,729.2,265
+Scale factor,1.4,684.3,236
+
+Patch size,6,320.0,72
+Patch size,12,500.4,145
+Patch size,24,728.2,221
+Patch size,48,825.3,287
+
+
+seasons/neighborhood/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,712.1,216
+FAST Threshold,10,698.4,251
+FAST Threshold,20,625.4,114
+FAST Threshold,40,421.8,18
+
+Number of levels,4,582.6,255
+Number of levels,8,619.8,248
+Number of levels,12,606.8,200
+Number of levels,16,578.9,187
+
+Scale factor,1.1,629.0,227
+Scale factor,1.2,619.8,248
+Scale factor,1.3,582.9,221
+Scale factor,1.4,543.4,238
+
+Patch size,6,223.3,61
+Patch size,12,395.5,137
+Patch size,24,619.8,248
+Patch size,48,694.5,225
+
+
+seasons/neighborhood/loop3
+parameter,setting,mean,min
+
+FAST Threshold,5,727.1,249
+FAST Threshold,10,706.2,271
+FAST Threshold,20,614.9,137
+FAST Threshold,40,373.1,18
+
+Number of levels,4,618.4,266
+Number of levels,8,648.7,277
+Number of levels,12,664.8,255
+Number of levels,16,669.5,239
+
+Scale factor,1.1,648.7,277
+Scale factor,1.2,635.5,244
+Scale factor,1.3,594.4,209
+Scale factor,1.4,555.5,218
+
+Patch size,6,255.3,80
+Patch size,12,429.8,153
+Patch size,24,635.5,244
+Patch size,48,663.1,187
+
+
+seasons/neighborhood/loop4
+parameter,setting,mean,min
+
+FAST Threshold,5,714.4,163
+FAST Threshold,10,692.1,130
+FAST Threshold,20,591.0,118
+FAST Threshold,40,293.1,29
+
+Number of levels,4,718.0,219
+Number of levels,8,744.7,210
+Number of levels,12,739.8,184
+Number of levels,16,690.9,173
+
+Scale factor,1.1,744.7,210
+Scale factor,1.2,707.8,187
+Scale factor,1.3,629.1,178
+Scale factor,1.4,592.5,177
+
+Patch size,6,211.5,18
+Patch size,12,387.7,74
+Patch size,24,624.5,167
+Patch size,48,707.8,187
+
+
+seasons/neighborhood/loop5
+parameter,setting,mean,min
+
+FAST Threshold,5,697.5,192
+FAST Threshold,10,690.6,188
+FAST Threshold,20,647.5,152
+FAST Threshold,40,514.9,23
+
+Number of levels,4,726.5,144
+Number of levels,8,733.3,194
+Number of levels,12,651.9,180
+Number of levels,16,619.4,164
+
+Scale factor,1.1,726.7,148
+Scale factor,1.2,733.3,194
+Scale factor,1.3,646.0,169
+Scale factor,1.4,602.8,144
+
+Patch size,6,220.9,36
+Patch size,12,386.0,102
+Patch size,24,613.5,165
+Patch size,48,733.3,194
+
+
+seasons/neighborhood/loop6
+parameter,setting,mean,min
+
+FAST Threshold,5,812.4,196
+FAST Threshold,10,797.9,170
+FAST Threshold,20,713.6,132
+FAST Threshold,40,464.9,59
+
+Number of levels,4,686.9,181
+Number of levels,8,725.1,206
+Number of levels,12,747.5,209
+Number of levels,16,758.6,220
+
+Scale factor,1.1,725.1,206
+Scale factor,1.2,722.7,178
+Scale factor,1.3,696.7,142
+Scale factor,1.4,650.8,181
+
+Patch size,6,302.7,51
+Patch size,12,486.3,124
+Patch size,24,722.7,178
+Patch size,48,810.3,174
+
+
+seasons/neighborhood/loop7
+parameter,setting,mean,min
+
+FAST Threshold,5,754.4,346
+FAST Threshold,10,737.0,302
+FAST Threshold,20,658.5,157
+FAST Threshold,40,430.3,62
+
+Number of levels,4,771.2,325
+Number of levels,8,760.8,359
+Number of levels,12,679.6,288
+Number of levels,16,646.1,278
+
+Scale factor,1.1,776.7,353
+Scale factor,1.2,760.8,359
+Scale factor,1.3,674.5,326
+Scale factor,1.4,631.7,292
+
+Patch size,6,250.2,67
+Patch size,12,426.0,152
+Patch size,24,664.1,296
+Patch size,48,760.8,359
+
+
+seasons/business_campus/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,1036.0,123
+FAST Threshold,10,1034.1,98
+FAST Threshold,20,1018.1,82
+FAST Threshold,40,945.8,38
+
+Number of levels,4,933.6,116
+Number of levels,8,963.4,144
+Number of levels,12,950.7,138
+Number of levels,16,897.5,132
+
+Scale factor,1.1,946.0,114
+Scale factor,1.2,963.4,144
+Scale factor,1.3,944.5,123
+Scale factor,1.4,888.1,115
+
+Patch size,6,630.2,40
+Patch size,12,785.6,96
+Patch size,24,963.4,144
+Patch size,48,1038.1,109
+
+
+seasons/business_campus/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,660.9,305
+FAST Threshold,10,659.4,285
+FAST Threshold,20,618.2,262
+FAST Threshold,40,359.8,28
+
+Number of levels,4,655.9,295
+Number of levels,8,684.1,312
+Number of levels,12,698.4,307
+Number of levels,16,667.9,292
+
+Scale factor,1.1,684.1,312
+Scale factor,1.2,695.3,312
+Scale factor,1.3,617.6,250
+Scale factor,1.4,580.6,301
+
+Patch size,6,186.8,66
+Patch size,12,348.6,153
+Patch size,24,568.3,292
+Patch size,48,695.3,312
+
+
+seasons/business_campus/loop3
+parameter,setting,mean,min
+
+FAST Threshold,5,689.8,221
+FAST Threshold,10,685.0,236
+FAST Threshold,20,644.9,103
+FAST Threshold,40,502.1,12
+
+Number of levels,4,554.4,225
+Number of levels,8,585.9,240
+Number of levels,12,612.3,219
+Number of levels,16,631.4,185
+
+Scale factor,1.1,585.9,240
+Scale factor,1.2,596.3,216
+Scale factor,1.3,574.7,203
+Scale factor,1.4,534.2,173
+
+Patch size,6,211.7,50
+Patch size,12,372.9,131
+Patch size,24,596.3,216
+Patch size,48,698.9,195
+
+
+seasons/city_loop/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,792.5,57
+FAST Threshold,10,770.9,53
+FAST Threshold,20,677.9,38
+FAST Threshold,40,388.4,10
+
+Number of levels,4,668.0,89
+Number of levels,8,711.8,97
+Number of levels,12,742.4,109
+Number of levels,16,761.4,92
+
+Scale factor,1.1,711.8,97
+Scale factor,1.2,718.8,96
+Scale factor,1.3,690.6,95
+Scale factor,1.4,642.6,74
+
+Patch size,6,360.4,14
+Patch size,12,519.6,63
+Patch size,24,718.8,96
+Patch size,48,764.1,83
+
+
+seasons/city_loop/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,729.3,53
+FAST Threshold,10,721.1,42
+FAST Threshold,20,661.6,21
+FAST Threshold,40,455.2,0
+
+Number of levels,4,621.5,68
+Number of levels,8,664.6,87
+Number of levels,12,663.9,92
+Number of levels,16,629.8,85
+
+Scale factor,1.1,663.7,47
+Scale factor,1.2,664.6,87
+Scale factor,1.3,641.8,68
+Scale factor,1.4,596.8,61
+
+Patch size,6,343.3,11
+Patch size,12,488.9,33
+Patch size,24,664.6,87
+Patch size,48,717.1,56
+
+
+seasons/city_loop/loop3
+parameter,setting,mean,min
+
+FAST Threshold,5,767.3,43
+FAST Threshold,10,762.1,34
+FAST Threshold,20,717.7,25
+FAST Threshold,40,542.2,16
+
+Number of levels,4,660.2,67
+Number of levels,8,688.5,69
+Number of levels,12,641.5,67
+Number of levels,16,626.6,67
+
+Scale factor,1.1,691.6,63
+Scale factor,1.2,702.9,68
+Scale factor,1.3,688.5,69
+Scale factor,1.4,641.9,53
+
+Patch size,6,387.5,10
+Patch size,12,529.5,35
+Patch size,24,702.9,68
+Patch size,48,762.0,33
+
+
+seasons/country_side/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,556.6,143
+FAST Threshold,10,533.7,119
+FAST Threshold,20,396.6,54
+FAST Threshold,40,194.6,0
+
+Number of levels,4,500.2,123
+Number of levels,8,531.6,154
+Number of levels,12,481.5,111
+Number of levels,16,460.5,115
+
+Scale factor,1.1,571.9,119
+Scale factor,1.2,531.6,154
+Scale factor,1.3,464.4,118
+Scale factor,1.4,432.5,99
+
+Patch size,6,208.3,35
+Patch size,12,342.8,86
+Patch size,24,495.0,125
+Patch size,48,531.6,154
+
+
+seasons/country_side/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,625.9,193
+FAST Threshold,10,624.6,200
+FAST Threshold,20,544.8,175
+FAST Threshold,40,237.2,64
+
+Number of levels,4,541.8,163
+Number of levels,8,613.8,212
+Number of levels,12,654.8,228
+Number of levels,16,617.0,223
+
+Scale factor,1.1,613.8,212
+Scale factor,1.2,588.2,201
+Scale factor,1.3,516.4,163
+Scale factor,1.4,481.3,160
+
+Patch size,6,247.0,30
+Patch size,12,384.1,93
+Patch size,24,545.0,169
+Patch size,48,588.2,201
+
+
+seasons/country_side/loop3
+parameter,setting,mean,min
+
+FAST Threshold,5,555.7,111
+FAST Threshold,10,549.6,110
+FAST Threshold,20,470.7,112
+FAST Threshold,40,276.4,16
+
+Number of levels,4,393.3,92
+Number of levels,8,427.4,117
+Number of levels,12,418.2,95
+Number of levels,16,404.5,96
+
+Scale factor,1.1,463.5,86
+Scale factor,1.2,427.4,117
+Scale factor,1.3,385.9,98
+Scale factor,1.4,357.3,98
+
+Patch size,6,175.0,29
+Patch size,12,294.5,77
+Patch size,24,427.4,117
+Patch size,48,421.1,106
+
+
+seasons/country_side/loop4
+parameter,setting,mean,min
+
+FAST Threshold,5,662.6,169
+FAST Threshold,10,651.3,159
+FAST Threshold,20,535.7,105
+FAST Threshold,40,201.3,0
+
+Number of levels,4,624.2,172
+Number of levels,8,671.0,206
+Number of levels,12,687.7,224
+Number of levels,16,645.3,227
+
+Scale factor,1.1,671.0,206
+Scale factor,1.2,638.2,201
+Scale factor,1.3,564.6,172
+Scale factor,1.4,528.9,148
+
+Patch size,6,233.3,14
+Patch size,12,390.6,76
+Patch size,24,580.2,153
+Patch size,48,638.2,201
+
+
+seasons/maximalaneum/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,924.6,193
+FAST Threshold,10,921.0,175
+FAST Threshold,20,858.9,67
+FAST Threshold,40,628.3,19
+
+Number of levels,4,815.4,150
+Number of levels,8,844.3,175
+Number of levels,12,838.8,163
+Number of levels,16,793.0,152
+
+Scale factor,1.1,827.4,139
+Scale factor,1.2,844.3,175
+Scale factor,1.3,831.4,152
+Scale factor,1.4,781.7,130
+
+Patch size,6,473.6,25
+Patch size,12,647.4,93
+Patch size,24,844.3,175
+Patch size,48,925.8,173
+
+
+seasons/maximalaneum/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,589.4,0
+FAST Threshold,10,515.9,0
+FAST Threshold,20,419.5,0
+FAST Threshold,40,329.6,0
+
+Number of levels,4,385.7,0
+Number of levels,8,452.6,10
+Number of levels,12,481.2,14
+Number of levels,16,496.4,14
+
+Scale factor,1.1,452.6,10
+Scale factor,1.2,427.7,8
+Scale factor,1.3,405.1,10
+Scale factor,1.4,381.3,0
+
+Patch size,6,304.2,0
+Patch size,12,427.7,8
+Patch size,24,578.9,0
+Patch size,48,577.1,0
+
+
+seasons/maximalaneum/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,924.6,193
+FAST Threshold,10,921.0,175
+FAST Threshold,20,858.9,67
+FAST Threshold,40,628.3,19
+
+Number of levels,4,815.4,150
+Number of levels,8,844.3,175
+Number of levels,12,838.8,163
+Number of levels,16,793.0,152
+
+Scale factor,1.1,827.4,139
+Scale factor,1.2,844.3,175
+Scale factor,1.3,831.4,152
+Scale factor,1.4,781.7,130
+
+Patch size,6,473.6,25
+Patch size,12,647.4,93
+Patch size,24,844.3,175
+Patch size,48,925.8,173
+
+
+seasons/maximalaneum/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,589.4,0
+FAST Threshold,10,515.9,0
+FAST Threshold,20,419.5,0
+FAST Threshold,40,329.6,0
+
+Number of levels,4,385.7,0
+Number of levels,8,452.6,10
+Number of levels,12,481.2,14
+Number of levels,16,496.4,14
+
+Scale factor,1.1,452.6,10
+Scale factor,1.2,427.7,8
+Scale factor,1.3,405.1,10
+Scale factor,1.4,381.3,0
+
+Patch size,6,304.2,0
+Patch size,12,427.7,8
+Patch size,24,578.9,0
+Patch size,48,577.1,0
+
+
+seasons/old_town/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,1041.5,181
+FAST Threshold,10,1040.3,175
+FAST Threshold,20,983.5,178
+FAST Threshold,40,635.0,77
+
+Number of levels,4,933.3,172
+Number of levels,8,971.4,196
+Number of levels,12,967.4,213
+Number of levels,16,915.4,170
+
+Scale factor,1.1,954.5,149
+Scale factor,1.2,971.4,196
+Scale factor,1.3,956.4,174
+Scale factor,1.4,898.5,152
+
+Patch size,6,605.3,38
+Patch size,12,788.7,111
+Patch size,24,971.4,196
+Patch size,48,1019.0,176
+
+
+seasons/old_town/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,919.8,90
+FAST Threshold,10,903.5,92
+FAST Threshold,20,744.4,74
+FAST Threshold,40,304.2,0
+
+Number of levels,4,882.2,110
+Number of levels,8,902.9,108
+Number of levels,12,892.0,124
+Number of levels,16,832.1,100
+
+Scale factor,1.1,902.9,108
+Scale factor,1.2,848.3,86
+Scale factor,1.3,750.9,80
+Scale factor,1.4,705.4,68
+
+Patch size,6,461.0,16
+Patch size,12,647.9,56
+Patch size,24,838.7,77
+Patch size,48,848.3,86
+
+
+seasons/old_town/loop3
+parameter,setting,mean,min
+
+FAST Threshold,5,982.7,108
+FAST Threshold,10,983.2,111
+FAST Threshold,20,968.5,120
+FAST Threshold,40,841.1,76
+
+Number of levels,4,986.6,137
+Number of levels,8,933.5,143
+Number of levels,12,828.1,124
+Number of levels,16,785.6,128
+
+Scale factor,1.1,968.1,127
+Scale factor,1.2,933.5,143
+Scale factor,1.3,827.7,118
+Scale factor,1.4,780.1,105
+
+Patch size,6,540.3,17
+Patch size,12,716.1,65
+Patch size,24,902.7,106
+Patch size,48,933.5,143
+
+
+seasons/old_town/loop4
+parameter,setting,mean,min
+
+FAST Threshold,5,679.5,55
+FAST Threshold,10,596.0,35
+FAST Threshold,20,480.5,27
+FAST Threshold,40,363.2,15
+
+Number of levels,4,607.6,48
+Number of levels,8,675.0,60
+Number of levels,12,666.9,56
+Number of levels,16,641.3,56
+
+Scale factor,1.1,694.7,46
+Scale factor,1.2,675.0,60
+Scale factor,1.3,627.2,43
+Scale factor,1.4,573.5,42
+
+Patch size,6,390.4,10
+Patch size,12,518.1,36
+Patch size,24,675.0,60
+Patch size,48,671.6,58
+
+
+seasons/parking_garage/loop1
+parameter,setting,mean,min
+
+FAST Threshold,5,752.6,277
+FAST Threshold,10,728.3,248
+FAST Threshold,20,609.8,37
+FAST Threshold,40,466.8,0
+
+Number of levels,4,756.1,254
+Number of levels,8,780.3,281
+Number of levels,12,783.8,306
+Number of levels,16,747.6,281
+
+Scale factor,1.1,780.3,281
+Scale factor,1.2,781.4,276
+Scale factor,1.3,695.7,248
+Scale factor,1.4,653.8,235
+
+Patch size,6,212.0,20
+Patch size,12,401.7,142
+Patch size,24,659.7,243
+Patch size,48,781.4,276
+
+
+seasons/parking_garage/loop2
+parameter,setting,mean,min
+
+FAST Threshold,5,490.1,18
+FAST Threshold,10,488.8,19
+FAST Threshold,20,468.3,18
+FAST Threshold,40,369.4,14
+
+Number of levels,4,416.4,15
+Number of levels,8,434.3,23
+Number of levels,12,430.6,23
+Number of levels,16,407.9,23
+
+Scale factor,1.1,436.5,20
+Scale factor,1.2,434.3,23
+Scale factor,1.3,418.8,13
+Scale factor,1.4,392.2,14
+
+Patch size,6,145.7,11
+Patch size,12,263.4,9
+Patch size,24,434.3,23
+Patch size,48,505.0,5
+
+
+seasons/parking_garage/loop3
+parameter,setting,mean,min
+
+FAST Threshold,5,733.9,253
+FAST Threshold,10,718.2,240
+FAST Threshold,20,637.5,115
+FAST Threshold,40,448.7,0
+
+Number of levels,4,742.6,250
+Number of levels,8,758.8,274
+Number of levels,12,756.9,281
+Number of levels,16,716.4,265
+
+Scale factor,1.1,758.8,274
+Scale factor,1.2,750.7,270
+Scale factor,1.3,669.9,226
+Scale factor,1.4,631.3,225
+
+Patch size,6,209.6,14
+Patch size,12,390.6,119
+Patch size,24,637.2,252
+Patch size,48,750.7,270
+
+

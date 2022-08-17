@@ -1,0 +1,528 @@
+kitti/00
+parameter,setting,mean,min
+
+FAST Threshold,5,320.7,48
+FAST Threshold,10,320.4,46
+FAST Threshold,20,320.6,44
+FAST Threshold,40,314.9,50
+
+Number of levels,4,309.8,49
+Number of levels,8,304.1,52
+Number of levels,12,274.4,47
+Number of levels,16,262.3,43
+
+Scale factor,1.1,339.8,45
+Scale factor,1.2,304.1,52
+Scale factor,1.3,266.5,50
+Scale factor,1.4,249.5,43
+
+Patch size,6,99.2,9
+Patch size,12,184.6,40
+Patch size,24,290.9,49
+Patch size,48,304.1,52
+
+
+kitti/01
+parameter,setting,mean,min
+
+FAST Threshold,5,311.3,63
+FAST Threshold,10,310.6,62
+FAST Threshold,20,303.0,62
+FAST Threshold,40,246.0,61
+
+Number of levels,4,275.6,70
+Number of levels,8,300.7,68
+Number of levels,12,272.0,56
+Number of levels,16,259.9,55
+
+Scale factor,1.1,311.2,52
+Scale factor,1.2,300.7,68
+Scale factor,1.3,256.2,60
+Scale factor,1.4,235.0,60
+
+Patch size,6,119.8,14
+Patch size,12,195.8,31
+Patch size,24,290.5,62
+Patch size,48,300.7,68
+
+
+kitti/02
+parameter,setting,mean,min
+
+FAST Threshold,5,257.5,38
+FAST Threshold,10,257.4,40
+FAST Threshold,20,257.0,39
+FAST Threshold,40,246.3,38
+
+Number of levels,4,203.0,29
+Number of levels,8,213.8,37
+Number of levels,12,200.5,39
+Number of levels,16,196.5,37
+
+Scale factor,1.1,255.5,24
+Scale factor,1.2,235.4,34
+Scale factor,1.3,213.8,37
+Scale factor,1.4,193.7,34
+
+Patch size,6,74.8,8
+Patch size,12,147.2,20
+Patch size,24,235.4,34
+Patch size,48,242.6,32
+
+
+kitti/03
+parameter,setting,mean,min
+
+FAST Threshold,5,347.6,111
+FAST Threshold,10,347.6,122
+FAST Threshold,20,348.1,122
+FAST Threshold,40,326.5,108
+
+Number of levels,4,287.7,80
+Number of levels,8,309.9,96
+Number of levels,12,314.7,104
+Number of levels,16,297.8,109
+
+Scale factor,1.1,334.2,95
+Scale factor,1.2,309.9,96
+Scale factor,1.3,291.8,86
+Scale factor,1.4,270.5,73
+
+Patch size,6,102.7,20
+Patch size,12,193.2,67
+Patch size,24,309.9,96
+Patch size,48,351.8,87
+
+
+kitti/04
+parameter,setting,mean,min
+
+FAST Threshold,5,388.6,194
+FAST Threshold,10,387.6,190
+FAST Threshold,20,389.3,196
+FAST Threshold,40,368.4,195
+
+Number of levels,4,342.0,196
+Number of levels,8,366.7,191
+Number of levels,12,380.5,169
+Number of levels,16,396.3,197
+
+Scale factor,1.1,366.7,191
+Scale factor,1.2,345.6,187
+Scale factor,1.3,324.0,180
+Scale factor,1.4,296.2,161
+
+Patch size,6,127.0,55
+Patch size,12,223.7,119
+Patch size,24,345.6,187
+Patch size,48,354.7,176
+
+
+kitti/05
+parameter,setting,mean,min
+
+FAST Threshold,5,362.8,98
+FAST Threshold,10,362.1,99
+FAST Threshold,20,361.4,100
+FAST Threshold,40,355.2,98
+
+Number of levels,4,316.7,60
+Number of levels,8,332.0,89
+Number of levels,12,328.4,87
+Number of levels,16,311.8,71
+
+Scale factor,1.1,354.1,79
+Scale factor,1.2,332.0,89
+Scale factor,1.3,311.4,85
+Scale factor,1.4,287.8,69
+
+Patch size,6,130.6,15
+Patch size,12,220.7,64
+Patch size,24,332.0,89
+Patch size,48,349.9,76
+
+
+kitti/06
+parameter,setting,mean,min
+
+FAST Threshold,5,240.1,40
+FAST Threshold,10,239.9,44
+FAST Threshold,20,241.0,43
+FAST Threshold,40,235.9,56
+
+Number of levels,4,210.8,49
+Number of levels,8,207.4,54
+Number of levels,12,189.1,34
+Number of levels,16,180.8,33
+
+Scale factor,1.1,235.3,33
+Scale factor,1.2,207.4,54
+Scale factor,1.3,182.1,48
+Scale factor,1.4,171.0,27
+
+Patch size,6,85.4,10
+Patch size,12,151.1,39
+Patch size,24,224.2,52
+Patch size,48,207.4,54
+
+
+kitti/07
+parameter,setting,mean,min
+
+FAST Threshold,5,434.3,109
+FAST Threshold,10,434.6,101
+FAST Threshold,20,434.9,109
+FAST Threshold,40,426.6,116
+
+Number of levels,4,384.6,101
+Number of levels,8,413.1,121
+Number of levels,12,424.8,116
+Number of levels,16,429.2,88
+
+Scale factor,1.1,413.1,121
+Scale factor,1.2,393.5,119
+Scale factor,1.3,363.8,90
+Scale factor,1.4,338.2,81
+
+Patch size,6,150.1,16
+Patch size,12,261.5,74
+Patch size,24,393.5,119
+Patch size,48,406.8,95
+
+
+kitti/08
+parameter,setting,mean,min
+
+FAST Threshold,5,311.7,65
+FAST Threshold,10,311.0,60
+FAST Threshold,20,311.4,58
+FAST Threshold,40,300.4,58
+
+Number of levels,4,297.8,49
+Number of levels,8,328.9,64
+Number of levels,12,340.8,63
+Number of levels,16,326.2,59
+
+Scale factor,1.1,328.9,64
+Scale factor,1.2,301.4,54
+Scale factor,1.3,258.8,28
+Scale factor,1.4,238.0,23
+
+Patch size,6,93.6,8
+Patch size,12,177.0,35
+Patch size,24,282.5,49
+Patch size,48,301.4,54
+
+
+kitti/09
+parameter,setting,mean,min
+
+FAST Threshold,5,259.3,61
+FAST Threshold,10,259.8,58
+FAST Threshold,20,258.9,57
+FAST Threshold,40,247.9,58
+
+Number of levels,4,247.2,66
+Number of levels,8,272.9,62
+Number of levels,12,285.2,70
+Number of levels,16,273.3,66
+
+Scale factor,1.1,272.9,62
+Scale factor,1.2,242.0,61
+Scale factor,1.3,205.6,42
+Scale factor,1.4,189.5,30
+
+Patch size,6,86.5,9
+Patch size,12,156.6,25
+Patch size,24,242.9,56
+Patch size,48,242.0,61
+
+
+kitti/10
+parameter,setting,mean,min
+
+FAST Threshold,5,341.2,50
+FAST Threshold,10,340.3,51
+FAST Threshold,20,338.6,52
+FAST Threshold,40,323.1,55
+
+Number of levels,4,271.9,49
+Number of levels,8,300.2,56
+Number of levels,12,295.3,54
+Number of levels,16,282.8,56
+
+Scale factor,1.1,323.7,38
+Scale factor,1.2,300.2,56
+Scale factor,1.3,268.3,55
+Scale factor,1.4,242.4,39
+
+Patch size,6,106.4,9
+Patch size,12,192.3,40
+Patch size,24,300.2,56
+Patch size,48,298.7,52
+
+
+kitti/11
+parameter,setting,mean,min
+
+FAST Threshold,5,290.6,29
+FAST Threshold,10,288.7,26
+FAST Threshold,20,290.8,27
+FAST Threshold,40,278.6,30
+
+Number of levels,4,252.6,29
+Number of levels,8,253.0,36
+Number of levels,12,231.4,34
+Number of levels,16,222.5,31
+
+Scale factor,1.1,305.7,28
+Scale factor,1.2,253.0,36
+Scale factor,1.3,213.4,29
+Scale factor,1.4,196.0,18
+
+Patch size,6,99.1,9
+Patch size,12,175.4,21
+Patch size,24,268.1,28
+Patch size,48,253.0,36
+
+
+kitti/12
+parameter,setting,mean,min
+
+FAST Threshold,5,296.4,68
+FAST Threshold,10,296.3,71
+FAST Threshold,20,292.6,62
+FAST Threshold,40,245.6,63
+
+Number of levels,4,270.9,74
+Number of levels,8,303.2,86
+Number of levels,12,317.2,83
+Number of levels,16,326.7,96
+
+Scale factor,1.1,303.2,86
+Scale factor,1.2,278.4,76
+Scale factor,1.3,258.2,69
+Scale factor,1.4,235.1,60
+
+Patch size,6,126.9,35
+Patch size,12,197.3,60
+Patch size,24,278.4,76
+Patch size,48,264.2,63
+
+
+kitti/13
+parameter,setting,mean,min
+
+FAST Threshold,5,303.1,43
+FAST Threshold,10,303.6,45
+FAST Threshold,20,302.7,45
+FAST Threshold,40,300.4,41
+
+Number of levels,4,309.1,51
+Number of levels,8,304.8,53
+Number of levels,12,270.3,44
+Number of levels,16,257.2,40
+
+Scale factor,1.1,324.9,48
+Scale factor,1.2,304.8,53
+Scale factor,1.3,266.3,32
+Scale factor,1.4,250.5,28
+
+Patch size,6,85.5,9
+Patch size,12,169.7,21
+Patch size,24,272.8,39
+Patch size,48,304.8,53
+
+
+kitti/14
+parameter,setting,mean,min
+
+FAST Threshold,5,260.2,86
+FAST Threshold,10,261.2,73
+FAST Threshold,20,256.9,73
+FAST Threshold,40,215.0,73
+
+Number of levels,4,249.1,62
+Number of levels,8,268.3,76
+Number of levels,12,239.6,65
+Number of levels,16,226.4,53
+
+Scale factor,1.1,280.8,70
+Scale factor,1.2,268.3,76
+Scale factor,1.3,231.9,66
+Scale factor,1.4,214.3,53
+
+Patch size,6,69.5,12
+Patch size,12,140.9,50
+Patch size,24,235.5,68
+Patch size,48,268.3,76
+
+
+kitti/15
+parameter,setting,mean,min
+
+FAST Threshold,5,329.7,43
+FAST Threshold,10,329.9,40
+FAST Threshold,20,330.4,39
+FAST Threshold,40,317.4,37
+
+Number of levels,4,270.2,29
+Number of levels,8,283.9,54
+Number of levels,12,266.7,52
+Number of levels,16,260.6,52
+
+Scale factor,1.1,321.8,33
+Scale factor,1.2,302.6,43
+Scale factor,1.3,283.9,54
+Scale factor,1.4,260.8,45
+
+Patch size,6,105.6,12
+Patch size,12,192.4,34
+Patch size,24,302.6,43
+Patch size,48,329.0,43
+
+
+kitti/16
+parameter,setting,mean,min
+
+FAST Threshold,5,305.0,99
+FAST Threshold,10,304.6,98
+FAST Threshold,20,304.9,97
+FAST Threshold,40,295.1,91
+
+Number of levels,4,252.8,66
+Number of levels,8,264.4,87
+Number of levels,12,247.7,69
+Number of levels,16,241.7,78
+
+Scale factor,1.1,296.2,67
+Scale factor,1.2,278.2,75
+Scale factor,1.3,264.4,87
+Scale factor,1.4,243.7,79
+
+Patch size,6,91.7,13
+Patch size,12,171.8,49
+Patch size,24,278.2,75
+Patch size,48,316.2,72
+
+
+kitti/17
+parameter,setting,mean,min
+
+FAST Threshold,5,197.8,46
+FAST Threshold,10,198.0,47
+FAST Threshold,20,195.3,44
+FAST Threshold,40,167.7,42
+
+Number of levels,4,190.6,49
+Number of levels,8,202.6,50
+Number of levels,12,207.5,52
+Number of levels,16,209.7,56
+
+Scale factor,1.1,202.6,50
+Scale factor,1.2,183.8,47
+Scale factor,1.3,171.5,37
+Scale factor,1.4,155.5,32
+
+Patch size,6,72.6,12
+Patch size,12,126.3,27
+Patch size,24,183.8,47
+Patch size,48,179.2,33
+
+
+kitti/18
+parameter,setting,mean,min
+
+FAST Threshold,5,330.5,101
+FAST Threshold,10,332.0,97
+FAST Threshold,20,331.1,91
+FAST Threshold,40,327.6,98
+
+Number of levels,4,315.2,78
+Number of levels,8,339.9,101
+Number of levels,12,350.3,85
+Number of levels,16,354.6,110
+
+Scale factor,1.1,339.9,101
+Scale factor,1.2,306.1,95
+Scale factor,1.3,278.3,86
+Scale factor,1.4,255.8,67
+
+Patch size,6,110.7,23
+Patch size,12,196.9,63
+Patch size,24,306.1,95
+Patch size,48,319.7,82
+
+
+kitti/19
+parameter,setting,mean,min
+
+FAST Threshold,5,339.7,66
+FAST Threshold,10,339.5,64
+FAST Threshold,20,339.4,69
+FAST Threshold,40,331.7,65
+
+Number of levels,4,295.8,52
+Number of levels,8,309.8,65
+Number of levels,12,303.2,71
+Number of levels,16,288.5,67
+
+Scale factor,1.1,334.0,60
+Scale factor,1.2,309.8,65
+Scale factor,1.3,286.8,62
+Scale factor,1.4,265.1,43
+
+Patch size,6,105.4,9
+Patch size,12,195.0,45
+Patch size,24,309.8,65
+Patch size,48,331.4,65
+
+
+kitti/20
+parameter,setting,mean,min
+
+FAST Threshold,5,445.3,114
+FAST Threshold,10,446.2,110
+FAST Threshold,20,445.7,113
+FAST Threshold,40,437.6,123
+
+Number of levels,4,429.1,133
+Number of levels,8,450.1,127
+Number of levels,12,444.9,122
+Number of levels,16,413.1,97
+
+Scale factor,1.1,450.1,127
+Scale factor,1.2,418.7,127
+Scale factor,1.3,372.3,108
+Scale factor,1.4,347.6,103
+
+Patch size,6,165.0,24
+Patch size,12,271.8,68
+Patch size,24,404.8,107
+Patch size,48,418.7,127
+
+
+kitti/21
+parameter,setting,mean,min
+
+FAST Threshold,5,284.2,57
+FAST Threshold,10,283.9,59
+FAST Threshold,20,280.5,59
+FAST Threshold,40,232.8,72
+
+Number of levels,4,186.7,84
+Number of levels,8,227.8,81
+Number of levels,12,231.8,75
+Number of levels,16,226.8,67
+
+Scale factor,1.1,264.7,75
+Scale factor,1.2,227.8,81
+Scale factor,1.3,195.8,64
+Scale factor,1.4,173.1,74
+
+Patch size,6,108.8,24
+Patch size,12,165.0,52
+Patch size,24,227.8,81
+Patch size,48,186.2,56
+
+
