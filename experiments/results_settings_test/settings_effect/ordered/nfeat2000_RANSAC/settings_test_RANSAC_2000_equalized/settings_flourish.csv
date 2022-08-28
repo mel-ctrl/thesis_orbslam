@@ -1,0 +1,48 @@
+flourish/DatasetA
+parameter,setting,mean,min
+
+FAST Threshold,5,823.1,556
+FAST Threshold,10,821.3,560
+FAST Threshold,20,820.5,526
+FAST Threshold,40,820.9,535
+
+Number of levels,4,865.2,625
+Number of levels,8,894.0,660
+Number of levels,12,907.5,630
+Number of levels,16,931.1,613
+
+Scale factor,1.1,894.0,660
+Scale factor,1.2,925.0,631
+Scale factor,1.3,823.0,526
+Scale factor,1.4,774.4,502
+
+Patch size,6,189.3,84
+Patch size,12,418.1,263
+Patch size,24,702.3,452
+Patch size,48,925.0,631
+
+
+flourish/DatasetB
+parameter,setting,mean,min
+
+FAST Threshold,5,802.5,555
+FAST Threshold,10,800.8,545
+FAST Threshold,20,801.7,526
+FAST Threshold,40,800.8,541
+
+Number of levels,4,871.7,603
+Number of levels,8,902.2,598
+Number of levels,12,831.0,549
+Number of levels,16,786.8,533
+
+Scale factor,1.1,864.8,595
+Scale factor,1.2,902.2,598
+Scale factor,1.3,804.6,506
+Scale factor,1.4,755.0,458
+
+Patch size,6,172.2,91
+Patch size,12,398.6,241
+Patch size,24,680.4,429
+Patch size,48,902.2,598
+
+

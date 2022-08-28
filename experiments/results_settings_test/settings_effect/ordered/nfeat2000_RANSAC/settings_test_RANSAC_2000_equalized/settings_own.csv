@@ -1,0 +1,360 @@
+own/mc0006_20220523_123903_barn_rainy
+parameter,setting,mean,min
+
+FAST Threshold,5,733.4,301
+FAST Threshold,10,734.1,291
+FAST Threshold,20,708.1,290
+FAST Threshold,40,552.2,48
+
+Number of levels,4,600.8,283
+Number of levels,8,641.9,312
+Number of levels,12,666.9,308
+Number of levels,16,679.6,289
+
+Scale factor,1.1,641.9,312
+Scale factor,1.2,641.6,296
+Scale factor,1.3,630.2,223
+Scale factor,1.4,591.3,239
+
+Patch size,6,252.0,94
+Patch size,12,433.0,182
+Patch size,24,641.6,296
+Patch size,48,704.0,255
+
+
+own/mc0006_20220523_123903_grass_rainy
+parameter,setting,mean,min
+
+FAST Threshold,5,143.1,46
+FAST Threshold,10,143.2,46
+FAST Threshold,20,143.0,48
+FAST Threshold,40,141.1,49
+
+Number of levels,4,146.4,41
+Number of levels,8,171.9,61
+Number of levels,12,189.5,73
+Number of levels,16,193.1,71
+
+Scale factor,1.1,171.9,61
+Scale factor,1.2,137.8,51
+Scale factor,1.3,107.4,27
+Scale factor,1.4,95.4,14
+
+Patch size,6,39.1,6
+Patch size,12,92.1,32
+Patch size,24,137.8,51
+Patch size,48,90.9,17
+
+
+own/mc0006_20220523_123903_road_rainy
+parameter,setting,mean,min
+
+FAST Threshold,5,236.9,17
+FAST Threshold,10,236.5,20
+FAST Threshold,20,230.1,17
+FAST Threshold,40,174.9,12
+
+Number of levels,4,215.2,30
+Number of levels,8,242.8,32
+Number of levels,12,237.5,31
+Number of levels,16,227.2,29
+
+Scale factor,1.1,286.5,31
+Scale factor,1.2,242.8,32
+Scale factor,1.3,198.2,16
+Scale factor,1.4,175.7,12
+
+Patch size,6,88.0,10
+Patch size,12,164.3,21
+Patch size,24,242.8,32
+Patch size,48,171.5,12
+
+
+own/mc0006_20220523_232418_barn_dark
+parameter,setting,mean,min
+
+FAST Threshold,5,634.0,100
+FAST Threshold,10,633.7,98
+FAST Threshold,20,624.1,34
+FAST Threshold,40,440.0,0
+
+Number of levels,4,509.1,103
+Number of levels,8,542.3,148
+Number of levels,12,562.2,131
+Number of levels,16,579.6,132
+
+Scale factor,1.1,542.3,148
+Scale factor,1.2,556.4,103
+Scale factor,1.3,550.3,96
+Scale factor,1.4,514.4,83
+
+Patch size,6,218.7,12
+Patch size,12,376.3,82
+Patch size,24,556.4,103
+Patch size,48,622.7,71
+
+
+own/mc0006_20220523_232418_grass_dark
+parameter,setting,mean,min
+
+FAST Threshold,5,57.0,5
+FAST Threshold,10,57.0,5
+FAST Threshold,20,56.0,5
+FAST Threshold,40,20.7,0
+
+Number of levels,4,45.2,6
+Number of levels,8,51.1,9
+Number of levels,12,47.8,9
+Number of levels,16,46.8,9
+
+Scale factor,1.1,59.3,6
+Scale factor,1.2,58.9,8
+Scale factor,1.3,51.1,9
+Scale factor,1.4,45.5,8
+
+Patch size,6,12.8,7
+Patch size,12,36.9,7
+Patch size,24,58.9,8
+Patch size,48,42.3,8
+
+
+own/mc0006_20220523_232418_road_dark
+parameter,setting,mean,min
+
+FAST Threshold,5,322.9,24
+FAST Threshold,10,321.9,27
+FAST Threshold,20,259.8,16
+FAST Threshold,40,96.4,0
+
+Number of levels,4,310.7,29
+Number of levels,8,355.0,44
+Number of levels,12,374.7,48
+Number of levels,16,374.1,61
+
+Scale factor,1.1,355.0,44
+Scale factor,1.2,313.5,32
+Scale factor,1.3,278.1,29
+Scale factor,1.4,254.4,21
+
+Patch size,6,116.4,10
+Patch size,12,212.4,20
+Patch size,24,313.5,32
+Patch size,48,269.4,15
+
+
+own/mc0006_20220523_232418_grass_normal
+parameter,setting,mean,min
+
+FAST Threshold,5,110.9,0
+FAST Threshold,10,110.9,0
+FAST Threshold,20,111.0,0
+FAST Threshold,40,108.6,0
+
+Number of levels,4,32.3,7
+Number of levels,8,43.1,7
+Number of levels,12,51.1,8
+Number of levels,16,57.7,8
+
+Scale factor,1.1,43.1,7
+Scale factor,1.2,28.6,7
+Scale factor,1.3,20.1,6
+Scale factor,1.4,15.9,6
+
+Patch size,6,28.6,7
+Patch size,12,72.5,6
+Patch size,24,108.0,5
+Patch size,48,79.8,0
+
+
+own/mc0006_20220523_232418_road_normal
+parameter,setting,mean,min
+
+FAST Threshold,5,223.9,54
+FAST Threshold,10,222.6,44
+FAST Threshold,20,221.2,51
+FAST Threshold,40,167.0,47
+
+Number of levels,4,206.8,53
+Number of levels,8,262.3,73
+Number of levels,12,295.3,99
+Number of levels,16,316.6,115
+
+Scale factor,1.1,262.3,73
+Scale factor,1.2,227.3,65
+Scale factor,1.3,191.0,56
+Scale factor,1.4,166.6,34
+
+Patch size,6,80.9,10
+Patch size,12,151.1,49
+Patch size,24,227.3,65
+Patch size,48,173.0,26
+
+
+own/den_boer_mc0038_20220613_095019_sunny
+parameter,setting,mean,min
+
+FAST Threshold,5,381.7,11
+FAST Threshold,10,381.5,11
+FAST Threshold,20,373.0,9
+FAST Threshold,40,310.7,5
+
+Number of levels,4,343.9,6
+Number of levels,8,384.8,15
+Number of levels,12,355.0,16
+Number of levels,16,339.5,15
+
+Scale factor,1.1,383.9,6
+Scale factor,1.2,384.8,15
+Scale factor,1.3,337.9,12
+Scale factor,1.4,313.9,12
+
+Patch size,6,166.2,7
+Patch size,12,253.9,9
+Patch size,24,358.8,13
+Patch size,48,384.8,15
+
+
+own/den_boer_mc0038_20220615_005023_dark
+parameter,setting,mean,min
+
+FAST Threshold,5,155.5,5
+FAST Threshold,10,154.9,4
+FAST Threshold,20,133.3,0
+FAST Threshold,40,76.2,0
+
+Number of levels,4,111.5,6
+Number of levels,8,176.0,9
+Number of levels,12,165.8,10
+Number of levels,16,159.1,8
+
+Scale factor,1.1,156.2,8
+Scale factor,1.2,176.0,9
+Scale factor,1.3,147.4,8
+Scale factor,1.4,131.3,9
+
+Patch size,6,71.7,8
+Patch size,12,116.0,7
+Patch size,24,154.6,7
+Patch size,48,176.0,9
+
+
+own/den_boer_mc0038_20220619_075057_rain
+parameter,setting,mean,min
+
+FAST Threshold,5,436.4,18
+FAST Threshold,10,435.9,18
+FAST Threshold,20,428.7,18
+FAST Threshold,40,336.0,17
+
+Number of levels,4,347.8,19
+Number of levels,8,384.2,29
+Number of levels,12,364.0,26
+Number of levels,16,356.2,25
+
+Scale factor,1.1,403.1,28
+Scale factor,1.2,401.8,27
+Scale factor,1.3,384.2,29
+Scale factor,1.4,352.5,18
+
+Patch size,6,186.0,8
+Patch size,12,283.5,23
+Patch size,24,401.8,27
+Patch size,48,435.7,12
+
+
+own/den_boer_mc0038_20220619_080430_after_rain
+parameter,setting,mean,min
+
+FAST Threshold,5,426.4,41
+FAST Threshold,10,426.6,41
+FAST Threshold,20,415.3,40
+FAST Threshold,40,313.4,13
+
+Number of levels,4,337.7,30
+Number of levels,8,394.8,49
+Number of levels,12,408.8,59
+Number of levels,16,391.7,54
+
+Scale factor,1.1,396.3,32
+Scale factor,1.2,394.8,49
+Scale factor,1.3,375.9,32
+Scale factor,1.4,343.5,27
+
+Patch size,6,175.4,10
+Patch size,12,273.9,30
+Patch size,24,394.8,49
+Patch size,48,427.9,31
+
+
+own/van_adrichem_mc0003_20220619_071337_after_rain
+parameter,setting,mean,min
+
+FAST Threshold,5,852.5,20
+FAST Threshold,10,852.6,21
+FAST Threshold,20,842.5,21
+FAST Threshold,40,682.3,13
+
+Number of levels,4,726.7,12
+Number of levels,8,757.2,28
+Number of levels,12,710.8,29
+Number of levels,16,694.0,29
+
+Scale factor,1.1,752.6,12
+Scale factor,1.2,766.0,25
+Scale factor,1.3,757.2,28
+Scale factor,1.4,712.4,15
+
+Patch size,6,394.0,15
+Patch size,12,561.7,13
+Patch size,24,766.0,25
+Patch size,48,887.0,16
+
+
+own/van_adrichem_mc0003_20220621_161250_sunny
+parameter,setting,mean,min
+
+FAST Threshold,5,762.2,40
+FAST Threshold,10,762.5,40
+FAST Threshold,20,747.5,41
+FAST Threshold,40,599.7,29
+
+Number of levels,4,643.0,51
+Number of levels,8,612.4,44
+Number of levels,12,588.1,41
+Number of levels,16,582.1,41
+
+Scale factor,1.1,671.6,31
+Scale factor,1.2,678.7,41
+Scale factor,1.3,649.8,41
+Scale factor,1.4,612.4,44
+
+Patch size,6,335.9,12
+Patch size,12,493.2,20
+Patch size,24,678.7,41
+Patch size,48,740.4,35
+
+
+own/van_adrichem_mc0003_20220622_000215_dark
+parameter,setting,mean,min
+
+FAST Threshold,5,415.0,5
+FAST Threshold,10,410.4,0
+FAST Threshold,20,359.5,0
+FAST Threshold,40,190.8,0
+
+Number of levels,4,166.1,7
+Number of levels,8,218.7,8
+Number of levels,12,245.9,9
+Number of levels,16,260.5,10
+
+Scale factor,1.1,218.7,8
+Scale factor,1.2,193.7,8
+Scale factor,1.3,178.9,7
+Scale factor,1.4,172.0,7
+
+Patch size,6,193.7,8
+Patch size,12,281.5,7
+Patch size,24,380.5,5
+Patch size,48,436.5,0
+
+
