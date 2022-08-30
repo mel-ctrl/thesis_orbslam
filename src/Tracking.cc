@@ -2734,10 +2734,11 @@ bool Tracking::TrackReferenceKeyFrame()
     mCurrentFrame.ComputeBoW();
     // We perform first an ORB matching with the reference keyframe
     // If enough matches are found we setup a PnP solver
-    ORBmatcher matcher(0.75,true); //0.7
+    ORBmatcher matcher(0.70,true); //0.7
     vector<MapPoint*> vpMapPointMatches;
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
+
     if(nmatches<15)
     {
         cout << "TRACK_REF_KF: Less than 15 matches!!\n";
@@ -2782,6 +2783,13 @@ bool Tracking::TrackReferenceKeyFrame()
                 nmatchesMap++;
         }
     }
+    #ifdef RECORD_MATCHING_STATS
+    ofstream statsfile;
+    statsfile.open("/home/meltem/thesis_orbslam/matchingSTATS.txt", fstream::app);
+    statsfile << mCurrentFrame.mSequence << "," << setprecision(19) << mCurrentFrame.mTimeStamp*1e9 <<  "," << mpAtlas->GetCurrentMap()->GetId() << "," << mCurrentFrame.N << "," << nmatches << "," << nmatchesMap  << "\n";
+    statsfile.close();
+
+    #endif
     if (mSensor == System::IMU_MONOCULAR || mSensor == System::IMU_STEREO || mSensor == System::IMU_RGBD)
         return true;
     else{
@@ -3047,15 +3055,6 @@ bool Tracking::TrackLocalMap()
                 mCurrentFrame.mvpMapPoints[i] = static_cast<MapPoint*>(NULL);
         }
     }
-
-
-    #ifdef RECORD_MATCHING_STATS
-    ofstream statsfile;
-    statsfile.open("/home/meltem/thesis_orbslam/matchingSTATS.txt", fstream::app);
-    statsfile << mCurrentFrame.mSequence << "," << setprecision(19) << mCurrentFrame.mTimeStamp*1e9 <<  "," << mpAtlas->GetCurrentMap()->GetId() << "," << mCurrentFrame.N << "," << mnMatches << "," << mnMatchesInliers << "\n";
-    statsfile.close();
-
-    #endif
 
     // Decide if the tracking was succesful
     // More restrictive if there was a relocalization recently
