@@ -2734,7 +2734,7 @@ bool Tracking::TrackReferenceKeyFrame()
     mCurrentFrame.ComputeBoW();
     // We perform first an ORB matching with the reference keyframe
     // If enough matches are found we setup a PnP solver
-    ORBmatcher matcher(0.70,true); //0.7
+    ORBmatcher matcher(0.90,true); //0.7
     vector<MapPoint*> vpMapPointMatches;
 
     int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
