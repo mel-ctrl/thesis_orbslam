@@ -2,7 +2,7 @@ import os
 import numpy as np
 import cv2
 from scipy.optimize import least_squares
-
+import matplotlib.pyplot as plt
 from lib.visualization import plotting
 from lib.visualization.video import play_trip
 
@@ -13,8 +13,8 @@ class VisualOdometry():
     def __init__(self, data_dir):
         self.K_l, self.P_l, self.K_r, self.P_r = self._load_calib(data_dir + '/calib.txt')
         self.gt_poses = self._load_poses('/media/meltem/moo/kitti/GT/02.txt')
-        self.images_l = self._load_images(data_dir + '/image_2_test')
-        self.images_r = self._load_images(data_dir + '/image_3_test')
+        self.images_l = self._load_images(data_dir + '/image_2')
+        self.images_r = self._load_images(data_dir + '/image_3')
 
         block = 11
         P1 = block * block * 8
@@ -188,6 +188,7 @@ class VisualOdometry():
             if len(keypoints) > 10:
                 keypoints = sorted(keypoints, key=lambda x: -x.response)
                 return keypoints[:10]
+
             return keypoints
         # Get the image height and width
         h, w, *_ = img.shape
@@ -197,6 +198,9 @@ class VisualOdometry():
 
         # Flatten the keypoint list
         kp_list_flatten = np.concatenate(kp_list)
+        print(len(kp_list_flatten))
+        img2 = cv2.drawKeypoints(img, kp_list_flatten, None, color=(0,255,0), flags=0)
+        plt.imshow(img2), plt.show()
         return kp_list_flatten
 
     def track_keypoints(self, img1, img2, kp1, max_error=4):
@@ -387,7 +391,6 @@ class VisualOdometry():
 
         # Track the keypoints
         tp1_l, tp2_l = self.track_keypoints(img1_l, img2_l, kp1_l)
-        print(tp1_l.shape, tp2_l.shape)
         # Calculate the disparitie
         self.disparities.append(np.divide(self.disparity.compute(img2_l, self.images_r[i]).astype(np.float32), 16))
 
@@ -406,7 +409,7 @@ def main():
     data_dir = '/media/meltem/moo/kitti/data_odometry_color/dataset/sequences/02' # Try KITTI_sequence_2
     vo = VisualOdometry(data_dir)
 
-    play_trip(vo.images_l, vo.images_r)  # Comment out to not play the trip
+    #play_trip(vo.images_l, vo.images_r)  # Comment out to not play the trip
 
     gt_path = []
     estimated_path = []

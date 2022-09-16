@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
-file = "/home/meltem/thesis_orbslam/den_boer_sunny_r09_thlow80_l6/matchingSTATS.txt"
+file = "/home/meltem/thesis_orbslam/experiments/tuning/ratio_test/den_boer_sunny_r095_thlow50_l4/matchingSTATS.txt"
 save_name = file.rsplit('/',1)[0] + "/" + ((file.rsplit('/',1)[-1]).split('.')[0]).split('_',1)[-1] + ".png"
 nlevels=list(file.rsplit('/',2)[-2].split('_')[-1])[-1]
 th = ('').join(list(file.rsplit('/',2)[-2].split('_')[-2])[-2:])
