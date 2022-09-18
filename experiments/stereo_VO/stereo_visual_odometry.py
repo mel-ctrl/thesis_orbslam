@@ -651,8 +651,8 @@ class VisualOdometry():
         disparity = np.divide(self.disparity.compute(img2_l, self.images_r[i]).astype(np.float32), 16)
 
         self.disparities.append(disparity)
-        imgtest = cv2.hconcat([disparity*4, img2_l.astype(np.float32), img2_r.astype(np.float32)])
-        plt.imsave("/home/meltem/thesis_orbslam/experiments/stereo_VO/disparities/img{i}.png".format(i=i), imgtest)
+        #imgtest = cv2.hconcat([disparity*4, img2_l.astype(np.float32), img2_r.astype(np.float32)])
+        #plt.imsave("/home/meltem/thesis_orbslam/experiments/stereo_VO/disparities/img{i}.png".format(i=i), imgtest)
 
         #kp1_r, ds1_r = self.get_tiled_keypoints(img1_r, 10, 20) #10, 20
         #kp2_r, ds2_r = self.get_tiled_keypoints(img2_r, 10, 20)
@@ -692,6 +692,9 @@ def main():
     gt_path = []
     
     estimated_path = []
+    matches_list = []
+    inliers_list = []
+
     #gt_pose = vo.gt_poses
     #gt_path = [(pose[0, 3], pose[1, 3]) for pose in gt_pose] 
     #for i in tqdm(list(range(len(vo.images_l))), unit="images"):
@@ -701,9 +704,9 @@ def main():
         else:
             transf, matches, inliers = vo.get_pose(i)
             cur_pose = np.matmul(cur_pose, transf)
-            with open("/home/meltem/thesis_orbslam/experiments/stereo_VO/matches_inliers.txt", "w") as f:
-                write = csv.writer(f)
-                write.writerow([matches, inliers])
+            matches_list.append(matches)
+            inliers_list.append(inliers)
+
         #gt_path.append((gt_pose[0, 3], gt_pose[1, 3]))
         #estimated_path.append((cur_pose[0, 3], cur_pose[1, 3]))
         #kitti:
@@ -718,6 +721,10 @@ def main():
         for i in range(len(estimated_path)):
             write.writerow([gt_path[i][0], gt_path[i][1], estimated_path[i][0], estimated_path[i][1]])
             #write.writerow([estimated_path[i][0], estimated_path[i][1]])
+    with open("/home/meltem/thesis_orbslam/experiments/stereo_VO/matches_inliers.txt", "w") as f:
+        write = csv.writer(f)
+        for i in range(len(matches_list)):
+            write.writerow([matches_list[i], inliers_list[i]])
 
     plotting.visualize_paths(gt_path, estimated_path, "Stereo Visual Odometry",
                         file_out=os.path.basename(data_dir) + ".html")

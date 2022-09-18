@@ -72,16 +72,21 @@ def _load_poses(filepath):
             T = np.fromstring(line, dtype=np.float64, sep=' ')
             T = T.reshape(3, 4)
             T = np.vstack((T, [0, 0, 0, 1]))
-            #T_rotate = np.empty((4, 4))
-            #T_rotate[:3, :3] = np.array([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0,0,1]])
-            #T_rotate[:3, 3] = [0, 0, 0]
-            #T_rotate[3, :] = [0, 0, 0, 1]
-            #T_final = np.matmul(T, T_rotate)
             poses.append(T)
     return poses
 
-estimated_poses = _load_poses('/home/meltem/thesis_orbslam/CameraTrajectory.txt')
+def _load_timestamps(filepath):
+    timestamps = []
+    with open(filepath, 'r') as f:
+        for line in f.readlines():
+            timestamps.append(float(line))
+
+
+timestamps_GT = _load_timestamps('/media/meltem/moo/kitti/data_odometry_color/dataset/sequences/02/times.txt')
 gt_poses = _load_poses('/media/meltem/moo/kitti/GT/02.txt')
+
+estimated_poses = _load_poses('/home/meltem/thesis_orbslam/CameraTrajectory.txt')
+timestamp_estimation = _load_timestamps('/home/meltem/thesis_orbslam/CameraTrajectory.txt')
 
 rot,transGT,trans_errorGT,trans,trans_error, scale = align(estimated_poses,gt_poses)
 estimated_poses_aligned = scale * rot * estimated_poses + transGT

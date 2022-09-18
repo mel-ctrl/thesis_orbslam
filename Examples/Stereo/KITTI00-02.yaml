@@ -4,7 +4,6 @@
 # Camera Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
 File.version: "1.0"
-
 Camera.type: "Rectified"
 
 # Camera calibration and distortion parameters (OpenCV) 
