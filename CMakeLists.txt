@@ -107,3 +107,13 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 -lboost_serialization
 -lcrypto
 )
+
+
+#Stereo examples
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Stereo)
+
+add_executable(stereo_kitti
+        Examples/Stereo/stereo_kitti.cc)
+target_link_libraries(stereo_kitti ${PROJECT_NAME})
+
+

@@ -18,12 +18,13 @@ class VisualOdometry():
     def __init__(self, data_dir, dataset, poses_path, calib_paths):
         self.images_l = []
         self.images_r = []
-        
+        self.matches = 0
+        self.inliers = 0
         if dataset == "kitti":
             self.K_l, self.P_l, self.K_r, self.P_r = self._load_calib(data_dir + '/calib.txt')
             self.gt_poses = self._load_poses('/media/meltem/moo/kitti/GT/02.txt')
-            self.images_l = self._load_images(data_dir + '/image_2')
-            self.images_r = self._load_images(data_dir + '/image_3')
+            self.images_l = self._load_images(data_dir + '/image_0')
+            self.images_r = self._load_images(data_dir + '/image_1')
         
         elif dataset == "own":
             den_boer_sunny_start_angle = 0.9 * np.pi #-1.84101874148744
@@ -65,13 +66,17 @@ class VisualOdometry():
                         gray = self._gray_images(img, 'right')
                         self.images_r.append(gray)
                     i +=1
+                #if i == 5:
+                #    break
                 
-        block = 11
-        P1 = block * block * 8
-        P2 = block * block * 32
-        self.disparity = cv2.StereoSGBM_create(minDisparity=0, numDisparities=32, blockSize=block, P1=P1, P2=P2)
+        block = 3 #11
+        smooth = 0.0
+        P1 = int(block * block * 8 * smooth)
+        P2 = int(block * block * 32 * smooth)
+        self.disparity = cv2.StereoSGBM_create(minDisparity=1, numDisparities=48, blockSize=block, P1=P1, P2=P2, speckleRange=0, speckleWindowSize=0)
         self.disparities = [
             np.divide(self.disparity.compute(self.images_l[0], self.images_r[0]).astype(np.float32), 16)]
+
         self.fastFeatures = cv2.FastFeatureDetector_create()
         self.orb = cv2.ORB_create(nfeatures=2000, scaleFactor=1.2, nlevels=8, edgeThreshold=48, firstLevel=0, WTA_K=2, scoreType=cv2.ORB_HARRIS_SCORE, patchSize=48, fastThreshold=5)
         #self.orb = cv2.ORB_create(nfeatures=2000, scaleFactor=1.05, nlevels=8, edgeThreshold=3, firstLevel=0, WTA_K=2, scoreType=cv2.ORB_HARRIS_SCORE, patchSize=3, fastThreshold=1)
@@ -479,6 +484,9 @@ class VisualOdometry():
         trackpoints1 = [kp1[x.queryIdx].pt for x in inliers]
         trackpoints2 = [kp2_l[x.trainIdx].pt for x in inliers]
 
+        self.matches = len(matches_good)
+        self.inliers = len(inliers)
+
         draw_params = dict(matchColor = (0,255,0), # draw matches in green color
             singlePointColor = (0,0,255),
             matchesMask = matchesMask.tolist(), # draw only inliers
@@ -489,7 +497,7 @@ class VisualOdometry():
 
         return np.array(trackpoints1), np.array(trackpoints2)
     
-    def calculate_right_qs(self, q1, q2, disp1, disp2, min_disp=0.0, max_disp=100.0):
+    def calculate_right_qs(self, q1, q2, disp1, disp2, min_disp=1.0, max_disp=48.0):
         """
         Calculates the right keypoints (feature points)
 
@@ -641,6 +649,7 @@ class VisualOdometry():
         kp2_l, ds2_l = self.orb.detectAndCompute(img2_l, None)
 
         disparity = np.divide(self.disparity.compute(img2_l, self.images_r[i]).astype(np.float32), 16)
+
         self.disparities.append(disparity)
         imgtest = cv2.hconcat([disparity*4, img2_l.astype(np.float32), img2_r.astype(np.float32)])
         plt.imsave("/home/meltem/thesis_orbslam/experiments/stereo_VO/disparities/img{i}.png".format(i=i), imgtest)
@@ -659,10 +668,11 @@ class VisualOdometry():
         Q1, Q2 = self.calc_3d(tp1_l, tp1_r, tp2_l, tp2_r)
         # Estimate the transformation matrix
         transformation_matrix = self.estimate_pose(tp1_l, tp2_l, Q1, Q2)
-        return transformation_matrix
+
+        return transformation_matrix, self.matches, self.inliers
 
 def main():
-    dataset = "own"
+    dataset = "kitti"
     if dataset == "kitti":
         data_dir = "/media/meltem/moo/kitti/data_odometry_color/dataset/sequences/02"
         vo = VisualOdometry(data_dir, dataset, "", "")
@@ -689,18 +699,26 @@ def main():
         if i < 1:
             cur_pose = gt_pose
         else:
-            transf = vo.get_pose(i)
+            transf, matches, inliers = vo.get_pose(i)
             cur_pose = np.matmul(cur_pose, transf)
-        gt_path.append((gt_pose[0, 3], gt_pose[1, 3]))
-        estimated_path.append((cur_pose[0, 3], cur_pose[1, 3]))
+            with open("/home/meltem/thesis_orbslam/experiments/stereo_VO/matches_inliers.txt", "w") as f:
+                write = csv.writer(f)
+                write.writerow([matches, inliers])
+        #gt_path.append((gt_pose[0, 3], gt_pose[1, 3]))
+        #estimated_path.append((cur_pose[0, 3], cur_pose[1, 3]))
+        #kitti:
+        gt_path.append((gt_pose[0, 3], gt_pose[2, 3]))
+        estimated_path.append((cur_pose[0, 3], cur_pose[2, 3]))
+
         i+=1
-        if i == 4745:
-            break
+        #if i == 4745:#3:
+        #    break
     with open('/home/meltem/thesis_orbslam/experiments/pathdata.csv', 'w') as f:
         write = csv.writer(f)
         for i in range(len(estimated_path)):
             write.writerow([gt_path[i][0], gt_path[i][1], estimated_path[i][0], estimated_path[i][1]])
             #write.writerow([estimated_path[i][0], estimated_path[i][1]])
+
     plotting.visualize_paths(gt_path, estimated_path, "Stereo Visual Odometry",
                         file_out=os.path.basename(data_dir) + ".html")
 
