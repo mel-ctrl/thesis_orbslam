@@ -13,6 +13,9 @@ import yaml
 import rosbag
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+from evo.core.trajectory import PoseTrajectory3D
+from evo.tools.file_interface import write_tum_trajectory_file
+
 
 class VisualOdometry():
     def __init__(self, data_dir, dataset, poses_path, calib_paths):
@@ -20,11 +23,13 @@ class VisualOdometry():
         self.images_r = []
         self.matches = 0
         self.inliers = 0
+        self.timestamps = []
         if dataset == "kitti":
             self.K_l, self.P_l, self.K_r, self.P_r = self._load_calib(data_dir + '/calib.txt')
             self.gt_poses = self._load_poses('/media/meltem/moo/kitti/GT/02.txt')
             self.images_l = self._load_images(data_dir + '/image_0')
             self.images_r = self._load_images(data_dir + '/image_1')
+            self.timestamps = self._load_timestamps('/media/meltem/moo/kitti/data_odometry_color/dataset/sequences/02/times.txt')
         
         elif dataset == "own":
             den_boer_sunny_start_angle = 0.9 * np.pi #-1.84101874148744
@@ -200,6 +205,14 @@ class VisualOdometry():
                 T[3, :] = [0, 0, 0, 1]
                 poses.append(T)
         return poses
+    
+    @staticmethod
+    def _load_timestamps(filepath):
+        ts = []
+        with open(filepath, 'r') as f:
+            for line in f.readlines():
+                ts.append(float(line))
+        return ts
 
     @staticmethod
     def _load_poses_flourish(filepath):
@@ -694,28 +707,25 @@ def main():
     estimated_path = []
     matches_list = []
     inliers_list = []
+    pose_list = []
 
-    #gt_pose = vo.gt_poses
-    #gt_path = [(pose[0, 3], pose[1, 3]) for pose in gt_pose] 
-    #for i in tqdm(list(range(len(vo.images_l))), unit="images"):
-    for i, gt_pose in enumerate(tqdm(vo.gt_poses, unit="poses")):
+    for gt_pose in vo.gt_poses:
+        gt_path.append((gt_pose[0, 3], gt_pose[2, 3]))
+
+    for i, gt_pose in enumerate(tqdm(vo.images_l, unit="poses")):
         if i < 1:
-            cur_pose = gt_pose
+            cur_pose = vo.gt_poses[0]
         else:
             transf, matches, inliers = vo.get_pose(i)
             cur_pose = np.matmul(cur_pose, transf)
             matches_list.append(matches)
             inliers_list.append(inliers)
-
-        #gt_path.append((gt_pose[0, 3], gt_pose[1, 3]))
-        #estimated_path.append((cur_pose[0, 3], cur_pose[1, 3]))
-        #kitti:
-        gt_path.append((gt_pose[0, 3], gt_pose[2, 3]))
         estimated_path.append((cur_pose[0, 3], cur_pose[2, 3]))
+        pose_list.append(cur_pose)
+    
+    pose_traj = PoseTrajectory3D(poses_se3=pose_list, timestamps=np.array(vo.timestamps))
+    write_tum_trajectory_file("tum_trajectory.txt", pose_traj)
 
-        i+=1
-        #if i == 4745:#3:
-        #    break
     with open('/home/meltem/thesis_orbslam/experiments/pathdata.csv', 'w') as f:
         write = csv.writer(f)
         for i in range(len(estimated_path)):
