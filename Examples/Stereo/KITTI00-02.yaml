@@ -5,12 +5,30 @@
 #--------------------------------------------------------------------------------------------
 File.version: "1.0"
 Camera.type: "Rectified"
-
+Camera.type: "PinHole"
 # Camera calibration and distortion parameters (OpenCV) 
 Camera1.fx: 718.856
 Camera1.fy: 718.856
 Camera1.cx: 607.1928
 Camera1.cy: 185.2157
+
+
+Camera2.fx: 718.856
+Camera2.fy: 718.856
+Camera2.cx: 607.1928
+Camera2.cy: 185.2157
+
+Camera1.k1: 0.0
+Camera1.k2: 0.0
+Camera1.p1: 0.0
+Camera1.p2: 0.0
+
+
+Camera2.k1: 0.0
+Camera2.k2: 0.0
+Camera2.p1: 0.0
+Camera2.p2: 0.0
+
 
 Camera.width: 1241
 Camera.height: 376
@@ -43,8 +61,8 @@ ORBextractor.nLevels: 8
 # Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
 # Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
 # You can lower these values if your images have low contrast			
-ORBextractor.iniThFAST: 20
-ORBextractor.minThFAST: 7
+ORBextractor.iniThFAST: 5 #20
+ORBextractor.minThFAST: 5 #7
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters

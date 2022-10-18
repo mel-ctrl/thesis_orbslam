@@ -4,15 +4,15 @@ import cv2
 from scipy.optimize import least_squares
 import csv
 from scipy.spatial.transform import Rotation
-
+from natsort import natsorted 
 from lib.visualization import plotting
 from lib.visualization.video import play_trip
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import yaml
-import rosbag
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
+#import rosbag
+#from sensor_msgs.msg import Image
+#from cv_bridge import CvBridge
 from evo.core.trajectory import PoseTrajectory3D
 from evo.tools.file_interface import write_tum_trajectory_file
 
@@ -26,21 +26,23 @@ class VisualOdometry():
         self.timestamps = []
         if dataset == "kitti":
             self.K_l, self.P_l, self.K_r, self.P_r = self._load_calib(data_dir + '/calib.txt')
-            self.gt_poses = self._load_poses('/media/meltem/moo/kitti/GT/02.txt')
+            self.gt_poses = self._load_poses('/media/meltem/moo/kitti/GT/00.txt')
             self.images_l = self._load_images(data_dir + '/image_0')
             self.images_r = self._load_images(data_dir + '/image_1')
-            self.timestamps = self._load_timestamps('/media/meltem/moo/kitti/data_odometry_color/dataset/sequences/02/times.txt')
+            self.timestamps = self._load_timestamps('/media/meltem/moo/kitti/data_odometry_color/dataset/sequences/00/times.txt')
         
         elif dataset == "own":
-            den_boer_sunny_start_angle = 0.9 * np.pi #-1.84101874148744
-            angle = den_boer_sunny_start_angle 
             self.K_l, self.P_l, self.D_l, self.R_l = self._load_calib_own(calib_paths[0])
             self.K_r, self.P_r, self.D_r, self.R_r  = self._load_calib_own(calib_paths[1])
-            self.gt_poses = self._load_poses_own(poses_path, angle)
+            self.gt_poses = self._load_poses(poses_path)
+            self.images_l = self._load_images_own(filepath=data_dir + '/left', side='left')
+            self.images_r = self._load_images_own(filepath=data_dir + '/right', side='right')
+            self.timestamps = self._load_timestamps(data_dir + '/times.txt')
             
-
+            """
             self.image_topic_left = "/daheng_camera_manager/left/image_rect"
             self.image_topic_right = "/daheng_camera_manager/right/image_rect"
+            """
 
         elif dataset == "flourish":
             self.K_l = np.array([[468.7667304393543, 0.0, 368.7056252615736], [0.0, 468.0464195624461, 213.4293421094116], [0.0, 0.0, 1.0]])
@@ -56,12 +58,13 @@ class VisualOdometry():
             self.image_topic_left = "/sensor/camera/vi_sensor/left/image_raw"
             self.image_topic_right = "/sensor/camera/vi_sensor/right/image_raw"
 
+        """
         if dataset == "own" or dataset=="flourish":
             bag = rosbag.Bag(data_dir, "r")
             bridge = CvBridge()
             i = 0
             for topic, msg, t in bag.read_messages(topics=[self.image_topic_left, self.image_topic_right]):
-                #print(msg.header.stamp)
+                print(msg.header.stamp)
                 img = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
                 if img is not None and len(img) != 0:
                     if topic == self.image_topic_left:
@@ -71,11 +74,10 @@ class VisualOdometry():
                         gray = self._gray_images(img, 'right')
                         self.images_r.append(gray)
                     i +=1
-                #if i == 5:
-                #    break
+        """
                 
         block = 3 #11
-        smooth = 0.0
+        smooth = 3.0
         P1 = int(block * block * 8 * smooth)
         P2 = int(block * block * 32 * smooth)
         self.disparity = cv2.StereoSGBM_create(minDisparity=1, numDisparities=48, blockSize=block, P1=P1, P2=P2, speckleRange=0, speckleWindowSize=0)
@@ -92,7 +94,8 @@ class VisualOdometry():
                               maxLevel=3,
                               criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 50, 0.03))
 
-    def _gray_images(self, img, topic):
+    def _gray_images(self, img, topic, path):
+        imgnr = path.split('/')[-1]
         if img.shape[-1] == 3:
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         #img = cv2.flip(img, 1)
@@ -102,7 +105,8 @@ class VisualOdometry():
         elif topic == 'right':
             map2_x, map2_y = cv2.initUndistortRectifyMap(self.K_r, self.D_r, self.R_r, self.P_r, (img.shape[1], img.shape[0]), cv2.CV_32FC1)
             img = cv2.remap(img, map2_x, map2_y , cv2.INTER_CUBIC)
-
+        #save_loc = "/media/meltem/T7/van_adrichem_sunny/{side}_rectified/{ext}".format(side=topic, ext=imgnr)
+        #cv2.imwrite(save_loc, img)
         return img
 
     @staticmethod
@@ -248,6 +252,22 @@ class VisualOdometry():
         """
         image_paths = [os.path.join(filepath, file) for file in sorted(os.listdir(filepath))]
         images = [cv2.imread(path, cv2.IMREAD_GRAYSCALE) for path in image_paths]
+        return images
+
+    def _load_images_own(self, filepath, side):
+        """
+        Loads the images
+
+        Parameters
+        ----------
+        filepath (str): The file path to image dir
+
+        Returns
+        -------
+        images (list): grayscale images. Shape (n, height, width)
+        """
+        image_paths = [os.path.join(filepath, file) for file in natsorted(os.listdir(filepath))]
+        images = [self._gray_images(cv2.imread(path, cv2.IMREAD_GRAYSCALE), side, path)for path in image_paths]
         return images
 
     @staticmethod
@@ -452,7 +472,7 @@ class VisualOdometry():
 
         return trackpoints1, trackpoints2
 
-    def track_keypointsbymatch(self, img1, img2, kp1, kp2_l, ds1_l, ds_2_l, max_error=100):
+    def track_keypointsbymatch(self, img1, img2, kp1, kp2_l, ds1_l, ds_2_l, img_idx, max_error=100):
         """
         Tracks the keypoints between frames
 
@@ -505,7 +525,8 @@ class VisualOdometry():
             matchesMask = matchesMask.tolist(), # draw only inliers
             flags = cv2.DrawMatchesFlags_DEFAULT)
         
-        #img3 = cv2.drawMatches(img1,kp1,img2,kp2_l,matches_good.tolist(),None,**draw_params)
+        img3 = cv2.drawMatches(img1,kp1,img2,kp2_l,matches_good.tolist(),None,**draw_params)
+        plt.imsave("/home/meltem/thesis_orbslam/experiments/stereo_VO/disparities/matches{i}.png".format(i=img_idx), img3)
         #plt.imshow(img3),plt.show()
 
         return np.array(trackpoints1), np.array(trackpoints2)
@@ -654,9 +675,7 @@ class VisualOdometry():
         img1_r, img2_r = self.images_r[i - 1:i + 1]
 
 
-        # Get teh tiled keypoints
-        #kp1_l = self.get_tiled_keypoints(img1_l, 10, 20) #10, 20
-        #kp2_l, ds2_l = self.get_tiled_keypoints(img2_l, 10, 20)
+
 
         kp1_l, ds1_l = self.orb.detectAndCompute(img1_l, None)
         kp2_l, ds2_l = self.orb.detectAndCompute(img2_l, None)
@@ -664,15 +683,18 @@ class VisualOdometry():
         disparity = np.divide(self.disparity.compute(img2_l, self.images_r[i]).astype(np.float32), 16)
 
         self.disparities.append(disparity)
-        #imgtest = cv2.hconcat([disparity*4, img2_l.astype(np.float32), img2_r.astype(np.float32)])
-        #plt.imsave("/home/meltem/thesis_orbslam/experiments/stereo_VO/disparities/img{i}.png".format(i=i), imgtest)
+        img_pair_dis = cv2.hconcat([img2_l.astype(np.float32), img2_r.astype(np.float32)])
+        disp_img = disparity 
+        plt.imsave("/home/meltem/thesis_orbslam/experiments/stereo_VO/disparities/disp{i_img}.png".format(i_img=i), disp_img*4)
+        #plt.imsave("/home/meltem/thesis_orbslam/experiments/stereo_VO/disparities/disp_pair{i}.png".format(i=i), img_pair_dis)
 
-        #kp1_r, ds1_r = self.get_tiled_keypoints(img1_r, 10, 20) #10, 20
-        #kp2_r, ds2_r = self.get_tiled_keypoints(img2_r, 10, 20)
+        
+        # Get teh tiled keypoints
+        #kp1_l = self.get_tiled_keypoints(img1_l, 10, 20) #10, 20
         # Track the keypoints
         #tp1_l, tp2_l = self.track_keypoints(img1_l, img2_l, kp1_l)
 
-        tp1_l, tp2_l = self.track_keypointsbymatch(img1_l, img2_l, kp1_l, kp2_l, ds1_l, ds2_l)
+        tp1_l, tp2_l = self.track_keypointsbymatch(img1_l, img2_l, kp1_l, kp2_l, ds1_l, ds2_l,i)
 
         # Calculate the right keypoints
         tp1_l, tp1_r, tp2_l, tp2_r = self.calculate_right_qs(tp1_l, tp2_l, self.disparities[i - 1], self.disparities[i])
@@ -685,15 +707,15 @@ class VisualOdometry():
         return transformation_matrix, self.matches, self.inliers
 
 def main():
-    dataset = "kitti"
+    dataset = "own"
     if dataset == "kitti":
-        data_dir = "/media/meltem/moo/kitti/data_odometry_color/dataset/sequences/02"
+        data_dir = "/media/meltem/moo/kitti/data_odometry_color/dataset/sequences/00"
         vo = VisualOdometry(data_dir, dataset, "", "")
     elif dataset == "own":   
         #data_dir = 'den_boer_mc0038_20220613_095019_sunny.bag'
-        data_dir = "/media/meltem/moo/Own/den_boer_mc0038_20220613_095019_sunny.bag"
+        data_dir = "/media/meltem/T7/den_boer_sunny"
         calib_paths = ["/home/meltem/thesis_orbslam/calib_files_own/left_den_boer.yaml", "/home/meltem/thesis_orbslam/calib_files_own/right_den_boer.yaml"]
-        poses_path = "/media/meltem/moo/Own/GT/den_boer/mc0038_20220613_095019_sunny.txt"
+        poses_path = "/media/meltem/moo/Own/GT/den_boer/kitti/mc0038_20220613_095019_sunny.txt"
         vo = VisualOdometry(data_dir, dataset, poses_path, calib_paths)
     elif dataset == "flourish":
         data_dir = "/media/meltem/moo/Flourish/DatasetA.bag"

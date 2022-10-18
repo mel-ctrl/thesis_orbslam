@@ -116,4 +116,8 @@ add_executable(stereo_kitti
         Examples/Stereo/stereo_kitti.cc)
 target_link_libraries(stereo_kitti ${PROJECT_NAME})
 
+add_executable(stereo_own
+        Examples/Stereo/stereo_own.cc)
+target_link_libraries(stereo_own ${PROJECT_NAME})
+
 
